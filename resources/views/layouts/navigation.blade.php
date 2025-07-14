@@ -12,23 +12,24 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    {{-- PERBAIKAN: Menghapus fungsi terjemahan __() --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Ruang Cerita') }}
+                        Ruang Cerita
                     </x-nav-link>
                     <x-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">
-                        {{ __('Artikel') }}
+                        Artikel
                     </x-nav-link>
                     <x-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">
-                        {{ __('Konsultasi AI') }}
+                        Konsultasi AI
                     </x-nav-link>
                     <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">
-                        {{ __('Cari Psikolog') }}
+                        Cari Psikolog
                     </x-nav-link>
                     <x-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">
-                        {{ __('Diary Harian') }}
+                        Diary Harian
                     </x-nav-link>
 
-                    {{-- PERBAIKAN: Tambahkan Menu Admin --}}
+                    {{-- Menu Admin --}}
                     @if(Auth::user()->role === 'admin')
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <x-dropdown align="right" width="48">
@@ -42,16 +43,16 @@
                                 </x-slot>
                                 <x-slot name="content">
                                     <x-dropdown-link :href="route('admin.articles.index')">
-                                        {{ __('Kelola Artikel') }}
+                                        Kelola Artikel
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.users.index')">
-                                        {{ __('Kelola Pengguna') }}
+                                        Kelola Pengguna
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.psychologists.index')">
-                                        {{ __('Verifikasi Psikolog') }}
+                                        Verifikasi Psikolog
                                     </x-dropdown-link>
                                     <x-dropdown-link :href="route('admin.consultation.verifications.index')">
-                                        {{ __('Verifikasi Pembayaran') }}
+                                        Verifikasi Pembayaran
                                     </x-dropdown-link>
                                 </x-slot>
                             </x-dropdown>
@@ -62,6 +63,9 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                 @auth
+                    <x-notification-dropdown :notifications="Auth::user()->unreadNotifications" />
+                @endauth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -77,7 +81,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profil Saya') }}
+                            Profil Saya
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -87,7 +91,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                Log Out
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -110,7 +114,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                Dashboard
             </x-responsive-nav-link>
         </div>
 
@@ -123,7 +127,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    Profile
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -133,7 +137,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        Log Out
                     </x-responsive-nav-link>
                 </form>
             </div>

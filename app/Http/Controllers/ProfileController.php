@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User; // <-- Tambahkan ini
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,22 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Menampilkan profil publik pengguna lain.
+     */
+    public function show(User $user): View // <-- Tambahkan method ini
+    {
+        // Ambil cerita dari user yang tidak anonim
+        $stories = $user->stories()
+                        ->where('is_anonymous', false)
+                        ->latest()
+                        ->paginate(10);
+
+        // Arahkan ke view yang benar berdasarkan struktur folder Anda
+        return view('consultations.profile.show', compact('user', 'stories'));
+    }
+
+    /**
+     * Menampilkan form profil pengguna.
      */
     public function edit(Request $request): View
     {
@@ -22,7 +38,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Memperbarui informasi profil pengguna.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -38,7 +54,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Menghapus akun pengguna.
      */
     public function destroy(Request $request): RedirectResponse
     {
