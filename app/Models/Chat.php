@@ -5,24 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Availability extends Model
+class Chat extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ //
-        'psychologist_id', //
-        'start_time', //
-        'end_time', //
-        'is_booked', //
+    protected $fillable = [
+        'consultation_id',
+        'sender_id',
+        'receiver_id',
+        'message',
+        'read_at',
     ];
 
-    protected $casts = [ //
-        'start_time' => 'datetime', //
-        'end_time' => 'datetime', //
+    protected $casts = [
+        'read_at' => 'datetime',
     ];
 
-    public function psychologist() //
+    public function consultation()
     {
-        return $this->belongsTo(User::class, 'psychologist_id'); //
+        return $this->belongsTo(Consultation::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 }

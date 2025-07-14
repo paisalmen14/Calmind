@@ -1,18 +1,27 @@
 <?php
 
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
 
-class CheckIsMember //
+class CheckIsMember
 {
-    public function handle(Request $request, Closure $next, ...$roles): Response //
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user() || ! in_array($request->user()->role, $roles)) { //
-            abort(403, 'ANDA TIDAK PUNYA AKSES.'); //
+        // PERBAIKAN: Logika diubah untuk memeriksa status member
+        if (!Auth::check() || !$request->user()->isMember()) {
+            // Redirect ke halaman membership jika bukan member
+            return redirect()->route('membership.index')->with('error', 'Anda harus menjadi member untuk mengakses halaman ini.');
         }
 
-        return $next($request); //
+        return $next($request);
     }
 }

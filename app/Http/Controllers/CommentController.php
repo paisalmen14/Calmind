@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Story;
-use App\Models\Comment; // <-- PASTIKAN BARIS INI ADA
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Notifications\NewCommentNotification;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\Gate;
 
 class CommentController extends Controller
@@ -22,12 +23,13 @@ class CommentController extends Controller
 
         $comment = $story->comments()->create([
             'content'   => $request->content,
-            'user_id'   => auth()->id(),
+            'user_id'   => Auth::id(), // <-- PERBAIKAN: Gunakan Auth::id()
             'parent_id' => $request->parent_id,
         ]);
 
-        if ($story->user_id !== auth()->id()) {
-                $story->user->notify(new NewCommentNotification($story, auth()->user()));
+        // PERBAIKAN: Gunakan Auth::user() untuk mendapatkan objek user
+        if ($story->user_id !== Auth::id()) {
+                $story->user->notify(new NewCommentNotification($story, Auth::user()));
             }
 
         return back()->with('success', 'Komentar berhasil ditambahkan!');
@@ -38,7 +40,6 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        // Otorisasi menggunakan Gate yang baru kita buat
         Gate::authorize('delete-comment', $comment);
 
         $comment->delete();

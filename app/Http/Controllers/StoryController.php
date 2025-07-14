@@ -1,15 +1,17 @@
 <?php
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Gate;
 use App\Models\Story;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
 
 class StoryController extends Controller
 {
     // Menampilkan semua cerita
     public function index(Request $request)
     {
-            // Ganti query lama dengan ini untuk memuat jumlah upvote dan downvote
+        // Ganti query lama dengan ini untuk memuat jumlah upvote dan downvote
         $query = Story::with('user')
             ->withCount([
                 'votes as upvotes_count' => fn ($q) => $q->where('vote', 1),
@@ -39,7 +41,6 @@ class StoryController extends Controller
         $stories = $query->paginate(10)->withQueryString();
         
         return view('dashboard', compact('stories'));
-        
     }
 
     // Menampilkan form untuk membuat cerita
@@ -56,7 +57,7 @@ class StoryController extends Controller
         ]);
 
         Story::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(), // <-- PERBAIKAN
             'content' => $request->content,
             'is_anonymous' => $request->has('is_anonymous'), 
         ]);
@@ -66,14 +67,13 @@ class StoryController extends Controller
 
    
     public function show(Story $story)
-{
-    
-    $story->load(['comments' => function ($query) {
-        $query->whereNull('parent_id')->with('user', 'replies.user'); 
-    }]);
+    {
+        $story->load(['comments' => function ($query) {
+            $query->whereNull('parent_id')->with('user', 'replies.user'); 
+        }]);
 
-    return view('stories.show', compact('story'));
-}
+        return view('stories.show', compact('story'));
+    }
 
     public function edit(Story $story)
     {
@@ -107,4 +107,4 @@ class StoryController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Cerita berhasil dihapus.');
     }
-    }
+}

@@ -91,21 +91,29 @@ class DailyDiaryController extends Controller
         return back()->with('success', 'Diary berhasil dihapus!');
     }
 
-    // Fitur rangkuman mingguan (Implementasi lebih lanjut)
+    /**
+     * Menghasilkan rangkuman diary dari minggu sebelumnya.
+     */
     public function generateWeeklySummary()
     {
-        // Logika untuk membuat rangkuman mingguan bisa sangat kompleks
-        // Contoh sederhana: mengambil semua entri minggu lalu dan menggabungkannya
         $startDate = Carbon::now()->subWeek()->startOfWeek();
         $endDate = Carbon::now()->subWeek()->endOfWeek();
 
         $weeklyDiaries = Auth::user()->dailyDiaries()
             ->whereBetween('entry_date', [$startDate, $endDate])
+            ->orderBy('entry_date') // Mengurutkan berdasarkan tanggal
             ->get();
 
         $summaryContent = "";
         foreach ($weeklyDiaries as $diary) {
-            $summaryContent .= "Tanggal " . $diary->entry_date->format('d M Y') . ": " . $diary->content . "\n\n";
+            // Menggunakan format yang lebih deskriptif
+            $summaryContent .= "Pada tanggal " . $diary->entry_date->isoFormat('dddd, D MMMM YYYY') . ", saya merasa:\n";
+            $summaryContent .= $diary->content . "\n\n";
+        }
+
+        // Menambahkan pesan jika tidak ada diary
+        if (empty(trim($summaryContent))) {
+            $summaryContent = "Anda tidak memiliki catatan diary pada minggu lalu.";
         }
 
         // Anda bisa memproses $summaryContent dengan AI (Gemini) untuk ringkasan yang lebih baik

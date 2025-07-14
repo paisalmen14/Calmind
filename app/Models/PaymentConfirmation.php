@@ -5,24 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Availability extends Model
+class PaymentConfirmation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ //
-        'psychologist_id', //
-        'start_time', //
-        'end_time', //
-        'is_booked', //
+    protected $fillable = [
+        'consultation_id',
+        'user_id',
+        'psychologist_id',
+        'transaction_id',
+        'amount',
+        'payment_date',
+        'proof_path',
+        'status',
+        'admin_notes',
     ];
 
-    protected $casts = [ //
-        'start_time' => 'datetime', //
-        'end_time' => 'datetime', //
-    ];
-
-    public function psychologist() //
+    public function consultation()
     {
-        return $this->belongsTo(User::class, 'psychologist_id'); //
+        return $this->belongsTo(Consultation::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

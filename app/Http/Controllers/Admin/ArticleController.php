@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
@@ -34,7 +35,7 @@ class ArticleController extends Controller
             'title' => $validated['title'],
             'content' => $validated['content'],
             'image_path' => $path,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(), // <-- PERBAIKAN: Gunakan Auth::id()
         ]);
 
         return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil dibuat.');
@@ -55,11 +56,9 @@ class ArticleController extends Controller
 
         $path = $article->image_path;
         if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
             if ($article->image_path) {
                 Storage::disk('public')->delete($article->image_path);
             }
-            // Simpan gambar baru
             $path = $request->file('image')->store('articles', 'public');
         }
 
@@ -74,7 +73,6 @@ class ArticleController extends Controller
 
     public function destroy(Article $article)
     {
-        // Hapus gambar dari storage
         if ($article->image_path) {
             Storage::disk('public')->delete($article->image_path);
         }

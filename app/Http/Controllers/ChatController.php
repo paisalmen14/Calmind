@@ -29,12 +29,12 @@ class ChatController extends Controller
         } elseif ($user->role === 'psikolog') {
             // Ambil sesi yang relevan (aktif dan sudah selesai)
             $consultations = Consultation::where('psychologist_id', $user->id)
-                                        ->whereIn('status', ['confirmed', 'completed']) // <-- PERUBAHAN DI SINI
+                                        ->whereIn('status', ['confirmed', 'completed'])
                                         ->with('user') 
                                         ->latest('requested_start_time')
                                         ->get();
         }
-        // Tampilkan view yang sama (chat.index), tapi sekarang datanya adalah daftar konsultasi
+        
         return view('chat.index', compact('consultations'));
     }
 
@@ -43,27 +43,25 @@ class ChatController extends Controller
      */
     public function show(Consultation $consultation)
     {
-        $isArchived = false; // Default, chat tidak diarsipkan (aktif)
+        $isArchived = false;
 
-    // Coba akses sebagai chat aktif terlebih dahulu
-    if (Gate::allows('access-consultation-chat', $consultation)) {
-        // Akses diizinkan, biarkan $isArchived = false
-    } 
-    // Jika gagal, coba akses sebagai riwayat/arsip
-    elseif (Gate::allows('view-chat-history', $consultation)) {
-        $isArchived = true; // Set sebagai arsip (read-only)
-    } 
-    // Jika keduanya gagal, tolak akses
-    else {
-        return redirect()->route('consultations.history')
-            ->with('error', 'Anda tidak memiliki akses ke sesi konsultasi ini.');
-    }
+        if (Gate::allows('access-consultation-chat', $consultation)) {
+            // Akses diizinkan
+        } 
+        elseif (Gate::allows('view-chat-history', $consultation)) {
+            $isArchived = true;
+        } 
+        else {
+            // Jika keduanya gagal, tolak akses
+            // Pastikan route 'consultations.history' ada atau ganti dengan route yang valid seperti 'dashboard'
+            return redirect()->route('consultations.history')
+                ->with('error', 'Anda tidak memiliki akses ke sesi konsultasi ini.');
+        }
         
-        // Tentukan siapa lawan bicara
-        $user = auth()->user();
+        // PERBAIKAN: Gunakan Auth::user() untuk mendapatkan user yang sedang login
+        $user = Auth::user();
         $contact = ($user->id === $consultation->user_id) ? $consultation->psychologist : $consultation->user;
 
-        // Ambil riwayat pesan untuk sesi ini
         $messages = $consultation->chats()->orderBy('created_at', 'asc')->get();
 
         // Tandai pesan dari lawan bicara sebagai sudah dibaca
@@ -87,8 +85,7 @@ class ChatController extends Controller
             return back()->with('error', 'Tidak dapat mengirim pesan. Sesi belum dimulai atau sudah berakhir.');
         }
 
-        // Tentukan penerima pesan secara otomatis dari objek konsultasi
-        $user = auth()->user();
+        $user = Auth::user();
         $receiverId = ($user->id === $consultation->user_id) ? $consultation->psychologist_id : $consultation->user_id;
 
         $consultation->chats()->create([

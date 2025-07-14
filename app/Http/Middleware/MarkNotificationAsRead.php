@@ -1,18 +1,25 @@
 <?php
 
 namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
-class MarkNotificationAsRead //
+class MarkNotificationAsRead
 {
-    public function handle(Request $request, Closure $next, ...$roles): Response //
+    public function handle(Request $request, Closure $next)
     {
-        if (! $request->user() || ! in_array($request->user()->role, $roles)) { //
-            abort(403, 'ANDA TIDAK PUNYA AKSES.'); //
+        if ($request->has('notif_id') && Auth::check()) {
+            $notification = Auth::user()
+                                ->notifications()
+                                ->where('id', $request->notif_id)
+                                ->first();
+            if ($notification) {
+                $notification->markAsRead();
+            }
         }
 
-        return $next($request); //
+        return $next($request);
     }
 }

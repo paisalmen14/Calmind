@@ -48,7 +48,7 @@ class ConsultationController extends Controller
         ]);
 
         $psychologist = User::with('psychologistProfile')->find($request->psychologist_id);
-        $user = Auth::user();
+        $user = Auth::user(); // PERBAIKAN
 
         // Hitung biaya
         $pricePerHour = $psychologist->psychologistProfile->price_per_hour;
@@ -79,7 +79,7 @@ class ConsultationController extends Controller
      */
     public function history()
     {
-        $user = auth()->user();
+        $user = Auth::user(); // PERBAIKAN
         
         // Mulai dengan Query Builder dasar
         $query = Consultation::query();

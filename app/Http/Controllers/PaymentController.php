@@ -6,6 +6,7 @@ use App\Models\Consultation;
 use App\Models\User;
 use App\Notifications\AdminPaymentPending;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
@@ -17,7 +18,7 @@ class PaymentController extends Controller
     public function create(Consultation $consultation)
     {
         // Pastikan user yang benar yang mengakses
-        if ($consultation->user_id !== auth()->id()) {
+        if ($consultation->user_id !== Auth::id()) { // <-- PERBAIKAN
             abort(403);
         }
 
@@ -38,10 +39,11 @@ class PaymentController extends Controller
         $request->validate([
             'proof' => 'required|image|max:2048',
             'amount' => 'required|numeric',
+            'payment_date' => 'required|date', // <-- Tambahkan validasi untuk tanggal
         ]);
 
         // Pastikan user & statusnya benar sebelum menyimpan
-        if ($consultation->user_id !== auth()->id() || $consultation->status !== 'pending_payment') {
+        if ($consultation->user_id !== Auth::id() || $consultation->status !== 'pending_payment') { // <-- PERBAIKAN
              return redirect()->route('consultations.history')->with('error', 'Reservasi ini tidak valid.');
         }
 
@@ -51,9 +53,9 @@ class PaymentController extends Controller
         $path = $request->file('proof')->store('payment_proofs', 'public');
         
         $consultation->paymentConfirmation()->create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(), // <-- PERBAIKAN
             'transaction_id' => 'TRX-' . time() . '-' . Str::upper(Str::random(6)),
-            'payment_date' => now(),
+            'payment_date' => $request->payment_date, // <-- PERBAIKAN: Ambil dari request
             'amount' => $request->amount,
             'proof_path' => $path,
             'status' => 'pending',

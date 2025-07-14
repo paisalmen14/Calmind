@@ -6,6 +6,7 @@ use App\Models\Story;
 use Illuminate\Http\Request;
 use App\Models\Vote;
 use App\Notifications\NewUpvoteNotification;
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
 
 class VoteController extends Controller
 {
@@ -14,7 +15,7 @@ class VoteController extends Controller
         $request->validate(['vote' => 'required|in:up,down']);
 
         $voteValue = $request->vote == 'up' ? 1 : -1;
-        $user = auth()->user();
+        $user = Auth::user(); // <-- PERBAIKAN
 
         $existingVote = $story->votes()->where('user_id', $user->id)->first();
 
