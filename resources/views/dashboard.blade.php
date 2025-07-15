@@ -40,14 +40,9 @@
                         <div class="flex items-start justify-between">
                              <div>
                                 <p class="font-bold text-lg text-gray-800">
-                                    {{-- ================================== --}}
-                                    {{-- PERBAIKAN UTAMA ADA DI BLOK INI --}}
-                                    {{-- ================================== --}}
                                     @if ($story->is_anonymous || !$story->user)
-                                        {{-- Jika cerita anonim ATAU user tidak ada, tampilkan "Anonim" tanpa link --}}
                                         <span class="text-gray-600">Anonim</span>
                                     @else
-                                        {{-- Hanya jika user ada, tampilkan nama dengan link ke profilnya --}}
                                         <a href="{{ route('profile.show', $story->user) }}" class="hover:underline">{{ $story->user->name }}</a>
                                     @endif
                                 </p>
@@ -63,20 +58,23 @@
                         <div class="mt-6 flex items-center space-x-6 border-t pt-4">
                             {{-- Tombol Votes --}}
                             <div class="flex items-center space-x-2 text-gray-500">
-                                <form action="{{ route('stories.vote', $story) }}" method="POST" class="inline">
+                                {{-- ================================== --}}
+                                {{-- PERBAIKAN UTAMA ADA DI BLOK INI --}}
+                                {{-- ================================== --}}
+                                <form action="{{ route('stories.vote', $story) }}" method="POST" class="inline vote-form">
                                     @csrf
                                     <input type="hidden" name="vote" value="up">
                                     <button type="submit" class="hover:text-green-500 transition-colors flex items-center gap-1">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                        <span class="text-sm font-medium">{{ $story->upvotes_count }}</span>
+                                        <span class="text-sm font-medium" id="upvotes-count-{{ $story->id }}">{{ $story->upvotes_count }}</span>
                                     </button>
                                 </form>
-                                <form action="{{ route('stories.vote', $story) }}" method="POST" class="inline">
+                                <form action="{{ route('stories.vote', $story) }}" method="POST" class="inline vote-form">
                                     @csrf
                                     <input type="hidden" name="vote" value="down">
                                     <button type="submit" class="hover:text-red-500 transition-colors flex items-center gap-1">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        <span class="text-sm font-medium">{{ $story->downvotes_count }}</span>
+                                        <span class="text-sm font-medium" id="downvotes-count-{{ $story->id }}">{{ $story->downvotes_count }}</span>
                                     </button>
                                 </form>
                             </div>
