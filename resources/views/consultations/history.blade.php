@@ -1,6 +1,7 @@
 @php
-   
-    $layoutComponent = 'app-layout'; 
+    // PERBAIKAN UTAMA DI SINI:
+    // Tentukan NAMA ALIAS komponen, bukan path ke file view.
+    $layoutComponent = 'app-layout'; // Default untuk pengguna biasa (nama aliasnya 'app-layout')
     if (Auth::check()) {
         if (Auth::user()->role === 'admin') {
             $layoutComponent = 'layouts.admin';

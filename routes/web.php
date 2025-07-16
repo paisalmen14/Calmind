@@ -15,6 +15,7 @@ use App\Http\Controllers\Psychologist\ProfileController as PsychologistProfileCo
 use App\Http\Controllers\DailyDiaryController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PsychologistController as AdminPsychologistController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
@@ -50,6 +51,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/stories/{story}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/stories/{story}/vote', [VoteController::class, 'vote'])->name('stories.vote');
+
+    // Rute khusus Psikolog
+Route::middleware(['auth', 'role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () {
+    // TAMBAHKAN ROUTE BARU DI SINI
+    Route::get('/dashboard', [App\Http\Controllers\Psychologist\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profile', [PsychologistProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [PsychologistProfileController::class, 'update'])->name('profile.update');
+    Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
+    Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
+    Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy'])->name('availability.destroy');
+});
 
     // Artikel
     Route::resource('articles', ArticleController::class)->only(['index', 'show']);
@@ -99,6 +112,9 @@ Route::middleware('auth')->group(function () {
 
 // Rute khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Route untuk dashboard admin
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('articles', AdminArticleController::class);
     
     // Kelola User

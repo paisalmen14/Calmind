@@ -1,5 +1,5 @@
 {{-- resources/views/admin/articles/edit.blade.php (Versi Elegan Baru) --}}
-<x-app-layout>
+<x-layouts.admin>
     <x-slot name="header">
         <h2 class="font-serif font-bold text-3xl text-gray-900">
             {{ __('Edit Artikel') }}
@@ -43,4 +43,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+<x-layouts.admin>

@@ -33,7 +33,8 @@ class ConsultationController extends Controller
             ->where('start_time', '>', now())
             ->get();
             
-        return view('consultations.show', compact('psychologist', 'availableSlots'));
+        // PERBAIKAN: Arahkan ke view yang benar
+        return view('consultations.psychologist.show', compact('psychologist', 'availableSlots'));
     }
 
     /**
@@ -48,7 +49,7 @@ class ConsultationController extends Controller
         ]);
 
         $psychologist = User::with('psychologistProfile')->find($request->psychologist_id);
-        $user = Auth::user(); // PERBAIKAN
+        $user = Auth::user();
 
         // Hitung biaya
         $pricePerHour = $psychologist->psychologistProfile->price_per_hour;
@@ -75,28 +76,21 @@ class ConsultationController extends Controller
 
     /**
      * Menampilkan riwayat konsultasi user.
-     * VERSI PERBAIKAN: Kode ini memastikan $consultations selalu berupa Paginator.
      */
     public function history()
     {
-        $user = Auth::user(); // PERBAIKAN
+        $user = Auth::user();
         
-        // Mulai dengan Query Builder dasar
         $query = Consultation::query();
 
         if ($user->role === 'pengguna') {
-            // Muat riwayat sebagai pasien
             $query = $user->consultationsAsUser()->with('psychologist');
         } elseif ($user->role === 'psikolog') {
-            // Muat riwayat sebagai psikolog
             $query = $user->consultationsAsPsychologist()->with('user');
         } else {
-            // Untuk Admin atau peran lain, buat query yang hasilnya pasti kosong
-            // tapi tetap bisa dipaginasi untuk menghindari error.
             $query->whereRaw('1 = 0');
         }
 
-        // Selalu panggil paginate di akhir pada query builder
         $consultations = $query->latest()->paginate(10);
 
         return view('consultations.history', compact('consultations'));
