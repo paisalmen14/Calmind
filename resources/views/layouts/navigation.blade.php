@@ -30,6 +30,10 @@
                         <x-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">
                             Diary Harian
                         </x-nav-link>
+                        {{-- Tambahkan link Ruang Chat untuk pengguna di sini --}}
+                        <x-nav-link :href="route('chat.index')" :active="request()->routeIs('chat.*')">
+                            Ruang Chat
+                        </x-nav-link>
                     @else
                     {{-- If the user IS an admin, show a direct link to the admin dashboard --}}
                          <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
@@ -90,6 +94,8 @@
                 <x-responsive-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">Konsultasi AI</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">Cari Psikolog</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">Diary Harian</x-responsive-nav-link>
+                {{-- Tambahkan link Ruang Chat untuk pengguna di sini (responsive) --}}
+                <x-responsive-nav-link :href="route('chat.index')" :active="request()->routeIs('chat.*')">Ruang Chat</x-responsive-nav-link>
             </div>
         @else
             {{-- Show admin menu for admins --}}
