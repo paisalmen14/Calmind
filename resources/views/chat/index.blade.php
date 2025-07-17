@@ -1,9 +1,15 @@
 @php
-    // Determine which layout to use based on the user's role
-    $layout = Auth::user()->role === 'psikolog' ? 'layouts.psychologist' : 'layouts.app';
+    // Tentukan layout mana yang akan digunakan berdasarkan peran pengguna
+    // Menggunakan alias komponen Blade yang benar (misalnya, 'app-layout' untuk layouts.app)
+    $layoutComponent = 'app-layout'; // Default untuk pengguna biasa (mengacu pada x-app-layout)
+    if (Auth::check()) {
+        if (Auth::user()->role === 'psikolog') {
+            $layoutComponent = 'layouts.psychologist'; // Mengacu pada x-layouts.psychologist
+        }
+    }
 @endphp
 
-<x-dynamic-component :component="$layout">
+<x-dynamic-component :component="$layoutComponent">
     <x-slot name="header">
         <h2 class="font-serif font-bold text-3xl text-gray-900">
             {{ __('Ruang Chat') }}

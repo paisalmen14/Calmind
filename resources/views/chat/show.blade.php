@@ -37,27 +37,35 @@
                     @endif
 
                     {{-- Chat Box --}}
-                    <div class="h-96 overflow-y-auto bg-slate-50 border border-gray-200 rounded-lg p-4 mb-4 space-y-4 flex flex-col" x-data="{ messages: [], init() { this.messages = @json($messages->toArray()); this.$nextTick(() => this.$refs.chatbox.scrollTop = this.$refs.chatbox.scrollHeight); } }" x-ref="chatbox">
-                        @forelse ($messages as $message)
-                            <div class="flex @if($message->sender_id === Auth::id()) justify-end @else justify-start @endif">
-                                <div class="max-w-md rounded-2xl p-4 @if($message->sender_id === Auth::id()) brand-gradient text-white @else bg-gray-200 text-gray-800 @endif">
-                                    <p class="whitespace-pre-wrap leading-relaxed">{{ $message->message }}</p>
-                                    <span class="text-xs @if($message->sender_id === Auth::id()) text-white/70 @else text-gray-500 @endif block mt-1 text-right">{{ $message->created_at->format('H:i') }}</span>
+                    <div class="h-96 overflow-y-auto bg-slate-50 border border-gray-200 rounded-lg p-4 mb-4 space-y-4 flex flex-col"
+                         x-data="chatData({{ json_encode($messages->toArray()) }}, {{ $consultation->id }})"
+                         x-init="init()"
+                         x-ref="chatbox">
+                        <template x-for="message in messages" :key="message.id">
+                            <div class="flex" :class="message.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
+                                <div class="max-w-md rounded-2xl p-4" :class="message.sender_id === {{ Auth::id() }} ? 'brand-gradient text-white' : 'bg-gray-200 text-gray-800'">
+                                    <p class="whitespace-pre-wrap leading-relaxed" x-text="message.message"></p>
+                                    <span class="text-xs" :class="message.sender_id === {{ Auth::id() }} ? 'text-white/70' : 'text-gray-500'" x-text="formatTime(message.created_at)"></span>
                                 </div>
                             </div>
-                        @empty
-                            <div class="flex-grow flex items-center justify-center text-gray-500 text-center">
-                                <p>Belum ada pesan dalam sesi ini.</p>
+                        </template>
+                        <div x-show="loading" class="flex justify-start">
+                            <div class="max-w-xs rounded-2xl p-4 bg-gray-200 text-gray-800">
+                                <p class="flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0s;"></span>
+                                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></span>
+                                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></span>
+                                </p>
                             </div>
-                        @endforelse
+                        </div>
                     </div>
 
                     {{-- Form Input Pesan --}}
-                    <form action="{{ route('chat.store', $consultation) }}" method="POST">
+                    <form @submit.prevent="sendMessage" x-data="chatData({{ json_encode($messages->toArray()) }}, {{ $consultation->id }})">
                         @csrf
                         <div class="flex space-x-3">
-                            <textarea name="message" rows="1" class="flex-grow border-gray-300 focus:border-brand-pink focus:ring-brand-pink rounded-full shadow-sm resize-none overflow-hidden" placeholder="{{ $isArchived ? 'Sesi chat diarsipkan.' : 'Ketik pesan Anda...' }}" {{ $isArchived ? 'disabled' : '' }}></textarea>
-                            <button type="submit" class="px-6 py-2 brand-gradient text-white font-semibold rounded-full hover:opacity-90 transition-all transform hover:scale-105 disabled:opacity-50 disabled:scale-100" {{ $isArchived ? 'disabled' : '' }}>
+                            <textarea name="message" x-model="newMessage" rows="1" class="flex-grow border-gray-300 focus:border-brand-pink focus:ring-brand-pink rounded-full shadow-sm resize-none overflow-hidden" placeholder="{{ $isArchived ? 'Sesi chat diarsipkan.' : 'Ketik pesan Anda...' }}" {{ $isArchived ? 'disabled' : '' }}></textarea>
+                            <button type="submit" class="px-6 py-2 brand-gradient text-white font-semibold rounded-full hover:opacity-90 transition-all transform hover:scale-105 disabled:opacity-50 disabled:scale-100" {{ $isArchived ? 'disabled' : '' }} :disabled="loading || !newMessage.trim()">
                                 Kirim
                             </button>
                         </div>
@@ -67,4 +75,90 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function chatData(initialMessages, consultationId) {
+            return {
+                messages: initialMessages,
+                newMessage: '',
+                loading: false,
+                consultationId: consultationId,
+                init() {
+                    this.scrollToBottom();
+                },
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        if (this.$refs.chatbox) {
+                            this.$refs.chatbox.scrollTop = this.$refs.chatbox.scrollHeight;
+                        }
+                    });
+                },
+                formatTime(timestamp) {
+                    const date = new Date(timestamp);
+                    return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                },
+                async sendMessage() {
+                    if (this.newMessage.trim() === '') return;
+
+                    this.loading = true;
+                    const messageToSend = this.newMessage;
+                    this.newMessage = ''; // Clear input immediately
+
+                    // Add user's message to UI optimistically
+                    const tempMessageId = Date.now(); // Temporary ID
+                    this.messages.push({
+                        id: tempMessageId,
+                        sender_id: {{ Auth::id() }},
+                        message: messageToSend,
+                        created_at: new Date().toISOString(), // Use ISO string for consistency
+                        is_temp: true // Mark as temporary
+                    });
+                    this.scrollToBottom();
+
+
+                    try {
+                        const response = await fetch(`{{ url('chat/consultation') }}/${this.consultationId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ message: messageToSend })
+                        });
+
+                        if (!response.ok) {
+                            // If response is not OK, revert the optimistic update
+                            this.messages = this.messages.filter(msg => msg.id !== tempMessageId);
+                            const errorData = await response.json();
+                            alert(errorData.message || 'Gagal mengirim pesan.');
+                            return;
+                        }
+
+                        // Assuming successful response means message was saved,
+                        // we don't need to add it again, it will be fetched by a real-time system
+                        // or on next page load. For now, we keep the optimistic update.
+                        // To remove the 'is_temp' flag, you might need to re-fetch or get the real ID from the backend.
+                        // For this example, we'll just remove the temp flag and assume success.
+                        this.messages = this.messages.map(msg => {
+                            if (msg.id === tempMessageId) {
+                                delete msg.is_temp; // Remove temporary flag
+                                // In a real app, you'd update with the actual ID from the server response
+                            }
+                            return msg;
+                        });
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        // Revert the optimistic update on error
+                        this.messages = this.messages.filter(msg => msg.id !== tempMessageId);
+                        alert('Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.');
+                    } finally {
+                        this.loading = false;
+                        this.scrollToBottom();
+                    }
+                }
+            }
+        }
+    </script>
 </x-dynamic-component>

@@ -70,7 +70,7 @@ class AuthServiceProvider extends ServiceProvider
         /**
          * Gate untuk melihat riwayat chat konsultasi.
          * Memungkinkan melihat riwayat untuk konsultasi yang sudah selesai, ditolak, dibatalkan,
-         * atau sedang menunggu verifikasi pembayaran.
+         * sedang menunggu verifikasi pembayaran, ATAU sesi yang sudah dikonfirmasi dan waktu mulainya sudah berlalu.
          */
         Gate::define('view-chat-history', function (User $user, Consultation $consultation) {
             // Pastikan pengguna adalah pasien atau psikolog dalam konsultasi ini
@@ -79,8 +79,17 @@ class AuthServiceProvider extends ServiceProvider
             }
 
             // Izinkan melihat riwayat jika statusnya adalah salah satu dari berikut:
-            return in_array($consultation->status, ['completed', 'payment_rejected', 'cancelled', 'pending_verification']);
+            // - 'completed', 'payment_rejected', 'cancelled', 'pending_verification'
+            if (in_array($consultation->status, ['completed', 'payment_rejected', 'cancelled', 'pending_verification'])) {
+                return true;
+            }
+
+            // ATAU jika statusnya 'confirmed' DAN waktu mulai sesi sudah lewat
+            if ($consultation->status === 'confirmed' && Carbon::now()->greaterThanOrEqualTo($consultation->requested_start_time)) {
+                return true;
+            }
+
+            return false; 
         });
     }
 }
-

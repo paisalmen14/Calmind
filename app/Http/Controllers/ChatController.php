@@ -8,6 +8,7 @@ use App\Models\Consultation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Carbon\Carbon; // Pastikan ini ada
 
 class ChatController extends Controller
 {
@@ -33,7 +34,7 @@ class ChatController extends Controller
             // - 'pending_verification': untuk sesi yang menunggu verifikasi pembayaran (agar bisa melihat chat awal jika ada)
             $consultations = Consultation::where('psychologist_id', $user->id)
                                         ->whereIn('status', ['confirmed', 'completed', 'pending_verification'])
-                                        ->with('user') 
+                                        ->with('user')
                                         ->latest('requested_start_time')
                                         ->get();
         }
@@ -46,34 +47,49 @@ class ChatController extends Controller
      */
     public function show(Consultation $consultation)
     {
-        $isArchived = false;
+        $user = Auth::user();
 
-        // Cek apakah pengguna memiliki akses live chat
-        if (Gate::allows('access-consultation-chat', $consultation)) {
-            // Jika diizinkan, ini adalah sesi live chat
-            $isArchived = false; 
-        } 
-        // Jika tidak ada akses live chat, cek apakah pengguna bisa melihat riwayat chat
-        elseif (Gate::allows('view-chat-history', $consultation)) {
-            // Jika diizinkan, ini adalah tampilan riwayat chat
-            $isArchived = true;
-        } 
-        else {
-            // Jika keduanya gagal, tolak akses dan arahkan kembali
+        // 1. Pastikan pengguna adalah bagian dari konsultasi ini
+        if ($user->id !== $consultation->user_id && $user->id !== $consultation->psychologist_id) {
             return redirect()->route('consultations.history')
                 ->with('error', 'Anda tidak memiliki akses ke sesi konsultasi ini.');
         }
-        
-        $user = Auth::user();
-        // Tentukan kontak (pihak lain dalam chat) berdasarkan siapa yang sedang login
+
+        // Tentukan apakah sesi ini diizinkan untuk live chat atau hanya melihat riwayat
+        $isLiveChatAllowed = Gate::allows('access-consultation-chat', $consultation);
+        $isViewHistoryAllowed = Gate::allows('view-chat-history', $consultation);
+
+        $isArchived = true; // Defaultnya adalah arsip (tidak bisa kirim pesan)
+
+        if ($isLiveChatAllowed) {
+            // Jika live chat diizinkan, maka ini adalah sesi live, bukan arsip
+            $isArchived = false;
+        } elseif ($isViewHistoryAllowed) {
+            // Jika live chat TIDAK diizinkan, tapi melihat riwayat DIZINKAN, maka ini adalah arsip
+            $isArchived = true;
+        } else {
+            // Jika TIDAK live chat dan TIDAK bisa melihat riwayat, maka ada beberapa kemungkinan:
+            // 1. Sesi 'confirmed' tapi masih di masa depan (belum waktunya bahkan untuk arsip awal)
+            // 2. Status konsultasi tidak diketahui/tidak diizinkan untuk diakses sama sekali.
+
+            // Kita cek apakah sesi ini confirmed dan masih di masa depan
+            if ($consultation->status === 'confirmed' && Carbon::now()->lessThan($consultation->requested_start_time)) {
+                return redirect()->route('consultations.history')
+                    ->with('error', 'Sesi konsultasi ini belum dimulai.');
+            }
+
+            // Untuk semua kasus lain di mana akses ditolak oleh kedua Gate
+            return redirect()->route('consultations.history')
+                ->with('error', 'Anda tidak memiliki akses ke sesi konsultasi ini.');
+        }
+
         $contact = ($user->id === $consultation->user_id) ? $consultation->psychologist : $consultation->user;
 
         // Ambil semua pesan untuk konsultasi ini, diurutkan berdasarkan waktu
         $messages = $consultation->chats()->orderBy('created_at', 'asc')->get();
 
         // Tandai pesan dari lawan bicara sebagai sudah dibaca, hanya jika ini bukan tampilan arsip
-        // Ini mencegah pesan di arsip ditandai ulang setiap kali dilihat
-        if (!$isArchived) {
+        if (!$isArchived) { // Hanya tandai sebagai dibaca jika ini sesi live
             $consultation->chats()
                          ->where('sender_id', $contact->id)
                          ->where('receiver_id', $user->id)
@@ -82,7 +98,8 @@ class ChatController extends Controller
         }
 
         // Tentukan layout yang akan digunakan berdasarkan peran pengguna
-        $layout = $user->role === 'psikolog' ? 'layouts.psychologist' : 'layouts.app';
+        // Menggunakan alias komponen Blade yang benar 'app-layout'
+        $layout = $user->role === 'psikolog' ? 'layouts.psychologist' : 'app-layout';
 
         return view('chat.show', compact('consultation', 'contact', 'messages', 'isArchived', 'layout'));
     }
@@ -107,7 +124,7 @@ class ChatController extends Controller
         // Buat pesan baru dalam chat konsultasi
         $consultation->chats()->create([
             'sender_id' => $user->id,
-            'receiver_id' => $receiverId, 
+            'receiver_id' => $receiverId,
             'message' => $request->message,
         ]);
 

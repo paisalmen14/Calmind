@@ -30,10 +30,7 @@
                         <x-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">
                             Diary Harian
                         </x-nav-link>
-                        {{-- Tambahkan link Ruang Chat untuk pengguna di sini --}}
-                        <x-nav-link :href="route('chat.index')" :active="request()->routeIs('chat.*')">
-                            Ruang Chat
-                        </x-nav-link>
+                        {{-- Link "Ruang Chat" dihapus dari sini --}}
                     @else
                     {{-- If the user IS an admin, show a direct link to the admin dashboard --}}
                          <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
@@ -61,6 +58,8 @@
                     </x-slot>
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">Profil Saya</x-dropdown-link>
+                        {{-- Menambahkan link "Riwayat Konsultasi" di bawah "Profil Saya" --}}
+                        <x-dropdown-link :href="route('consultations.history')">Riwayat Konsultasi</x-dropdown-link>
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -94,8 +93,7 @@
                 <x-responsive-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">Konsultasi AI</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">Cari Psikolog</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">Diary Harian</x-responsive-nav-link>
-                {{-- Tambahkan link Ruang Chat untuk pengguna di sini (responsive) --}}
-                <x-responsive-nav-link :href="route('chat.index')" :active="request()->routeIs('chat.*')">Ruang Chat</x-responsive-nav-link>
+                {{-- Link "Ruang Chat" dihapus dari sini (responsive) --}}
             </div>
         @else
             {{-- Show admin menu for admins --}}
@@ -117,6 +115,8 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">Profil Saya</x-responsive-nav-link>
+                {{-- Menambahkan link "Riwayat Konsultasi" di sini (responsive) --}}
+                <x-responsive-nav-link :href="route('consultations.history')">Riwayat Konsultasi</x-responsive-nav-link>
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
