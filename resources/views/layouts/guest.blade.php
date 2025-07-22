@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Calmind') }}</title>
+    <title>@yield('page_title', config('app.name', 'Calmind'))</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +14,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @extends('master')
 
     <!-- Styles -->
     <style>
@@ -27,18 +28,11 @@
         .soft-shadow { box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); }
     </style>
 </head>
-<body class="font-sans text-gray-800 elegant-bg">
+<body class="font-sans text-gray-800 bg-[#FEFBC7]">
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-        <!-- Logo -->
-        <div>
-            <a href="/" class="flex items-center gap-3" aria-label="Calmind Homepage">
-                <x-application-logo class="w-10 h-10 text-brand-purple" />
-                <span class="font-serif text-3xl font-bold text-gray-900">Calmind</span>
-            </a>
-        </div>
 
         <!-- Form Container -->
-        <div class="w-full sm:max-w-4xl mt-6">
+        <div class="w-full sm:max-w-5xl mt-6 md:px-12 md:py-16 bg-white soft-shadow rounded-3xl">
             {{ $slot }}
         </div>
     </div>

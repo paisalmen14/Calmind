@@ -4,8 +4,8 @@
 
         {{-- Judul Form yang Disesuaikan --}}
         <div class="text-center mb-8">
-            <h2 class="font-serif text-3xl font-bold text-gray-900">Pendaftaran Psikolog</h2>
-            <p class="mt-2 text-gray-600">Lengkapi data diri dan profesional Anda untuk bergabung.</p>
+            <h2 class="font-londrina text-5xl font-bold text-black">Pendaftaran Psikolog</h2>
+            <p class="mt-2 text-black font-quicksand">Lengkapi data diri dan profesional Anda untuk bergabung.</p>
         </div>
 
         @php
@@ -84,15 +84,15 @@
 
         {{-- Tombol dan Tautan Aksi --}}
         <div class="mt-8">
-            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-medium text-white brand-gradient hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-pink transition-all transform hover:scale-105">
+            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-gabarito text-black bg-[#FFB4B4] hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all transform hover:scale-105">
                 {{ __('Daftar sebagai Psikolog') }}
             </button>
         </div>
         
         <div class="mt-6 text-center">
-             <p class="text-sm text-gray-600">
+             <p class="text-sm font-gabarito text-black">
                 Sudah punya akun?
-                <a href="{{ route('login') }}" class="font-medium text-brand-pink hover:underline">
+                <a href="{{ route('login') }}" class="ml-1 font-gabarito bg-[#FFB4B4] px-3 py-2 rounded-[11px] text-black hover:opacity-70">
                     Masuk di sini
                 </a>
              </p>
