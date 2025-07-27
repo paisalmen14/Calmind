@@ -19,7 +19,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PsychologistController as AdminPsychologistController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
-
+use App\Http\Controllers\Api\MoodController; // <--- TAMBAHKAN USE STATEMENT INI
 
 // Rute ini diubah untuk menampilkan welcome page
 Route::get('/', function () {
@@ -28,6 +28,12 @@ Route::get('/', function () {
 
 // Dashboard akan menampilkan cerita
 Route::get('/dashboard', [StoryController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+// ... rute lainnya
+Route::get('/mood-tracker', function () {
+    return view('mood-tracker');
+})->middleware('auth')->name('mood.tracker');
+// ... rute lainnya
 
 // Pendaftaran Psikolog
 Route::get('register/psychologist', [PsychologistRegisterController::class, 'create'])->middleware('guest')->name('psychologist.register');
@@ -47,22 +53,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/story/{story}/edit', [StoryController::class, 'edit'])->name('stories.edit');
     Route::put('/story/{story}', [StoryController::class, 'update'])->name('stories.update');
     Route::delete('/story/{story}', [StoryController::class, 'destroy'])->name('stories.destroy');
-    
+
     Route::post('/stories/{story}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/stories/{story}/vote', [VoteController::class, 'vote'])->name('stories.vote');
 
     // Rute khusus Psikolog
-Route::middleware(['auth', 'role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () {
-    // TAMBAHKAN ROUTE BARU DI SINI
-    Route::get('/dashboard', [App\Http\Controllers\Psychologist\DashboardController::class, 'index'])->name('dashboard');
+    Route::middleware(['auth', 'role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () {
+        // TAMBAHKAN ROUTE BARU DI SINI
+        Route::get('/dashboard', [App\Http\Controllers\Psychologist\DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile', [PsychologistProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [PsychologistProfileController::class, 'update'])->name('profile.update');
-    Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
-    Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
-    Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy'])->name('availability.destroy');
-});
+        Route::get('/profile', [PsychologistProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [PsychologistProfileController::class, 'update'])->name('profile.update');
+        Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
+        Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
+        Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy'])->name('availability.destroy');
+    });
 
     // Artikel
     Route::resource('articles', ArticleController::class)->only(['index', 'show']);
@@ -71,11 +77,15 @@ Route::middleware(['auth', 'role:psikolog'])->prefix('psychologist')->name('psyc
     Route::get('/konsultasi', [ChatbotController::class, 'index'])->name('chatbot.index');
     Route::post('/konsultasi/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 
+    // --- AWAL KODE DETEKSI EMOSI ---
+    Route::post('/detect-emotion', [MoodController::class, 'detectEmotion'])->name('emotion.detect');
+    // --- AKHIR KODE DETEKSI EMOSI ---
+
     // Chat Konsultasi
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/consultation/{consultation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/consultation/{consultation}', [ChatController::class, 'store'])->name('chat.store');
-    
+
     // Daily Diary
     Route::prefix('daily-diary')->name('daily-diary.')->group(function () {
         Route::get('/', [DailyDiaryController::class, 'index'])->name('index');
@@ -116,7 +126,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('articles', AdminArticleController::class);
-    
+
     // Kelola User
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
@@ -133,4 +143,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Otentikasi default Breeze
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -15,35 +15,39 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     {{-- Show these links ONLY if the user is NOT an admin --}}
                     @if(Auth::user()->role !== 'admin')
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            Ruang Cerita
-                        </x-nav-link>
-                        <x-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">
-                            Artikel
-                        </x-nav-link>
-                        <x-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">
-                            Konsultasi AI
-                        </x-nav-link>
-                        <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">
-                            Cari Psikolog
-                        </x-nav-link>
-                        <x-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">
-                            Diary Harian
-                        </x-nav-link>
-                        {{-- Link "Ruang Chat" dihapus dari sini --}}
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        Ruang Cerita
+                    </x-nav-link>
+                    <x-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">
+                        Artikel
+                    </x-nav-link>
+                    <x-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">
+                        Konsultasi AI
+                    </x-nav-link>
+                    <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">
+                        Cari Psikolog
+                    </x-nav-link>
+                    <x-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">
+                        Diary Harian
+                    </x-nav-link>
+                    <x-nav-link :href="route('mood.tracker')" :active="request()->routeIs('mood.tracker')">
+                        Mood Tracker
+                    </x-nav-link>
+
+                    {{-- Link "Ruang Chat" dihapus dari sini --}}
                     @else
                     {{-- If the user IS an admin, show a direct link to the admin dashboard --}}
-                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
-                            Admin Dashboard
-                        </x-nav-link>
+                    <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                        Admin Dashboard
+                    </x-nav-link>
                     @endif
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                 @auth
-                    <x-notification-dropdown :notifications="Auth::user()->unreadNotifications" />
+                @auth
+                <x-notification-dropdown :notifications="Auth::user()->unreadNotifications" />
                 @endauth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -87,23 +91,23 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         {{-- Show user menu for non-admins --}}
         @if(Auth::user()->role !== 'admin')
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Ruang Cerita</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">Artikel</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">Konsultasi AI</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">Cari Psikolog</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">Diary Harian</x-responsive-nav-link>
-                {{-- Link "Ruang Chat" dihapus dari sini (responsive) --}}
-            </div>
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Ruang Cerita</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">Artikel</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">Konsultasi AI</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">Cari Psikolog</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">Diary Harian</x-responsive-nav-link>
+            {{-- Link "Ruang Chat" dihapus dari sini (responsive) --}}
+        </div>
         @else
-            {{-- Show admin menu for admins --}}
-             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">Pengguna</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.psychologists.index')" :active="request()->routeIs('admin.psychologists.*')">Psikolog</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.articles.index')" :active="request()->routeIs('admin.articles.*')">Artikel</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.consultation.verifications.index')" :active="request()->routeIs('admin.consultation.verifications.*')">Verifikasi</x-responsive-nav-link>
-            </div>
+        {{-- Show admin menu for admins --}}
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">Pengguna</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.psychologists.index')" :active="request()->routeIs('admin.psychologists.*')">Psikolog</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.articles.index')" :active="request()->routeIs('admin.articles.*')">Artikel</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.consultation.verifications.index')" :active="request()->routeIs('admin.consultation.verifications.*')">Verifikasi</x-responsive-nav-link>
+        </div>
         @endif
 
         <!-- Responsive Settings Options -->
