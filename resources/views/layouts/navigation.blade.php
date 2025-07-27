@@ -43,7 +43,6 @@
                     </x-nav-link>
                     @endif
                 </div>
-                >>>>>>> c76dc2c05f63794a85b65512f84404c9dbba69a0
             </div>
 
             <!-- Settings Dropdown -->
@@ -111,7 +110,6 @@
         <x-responsive-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">Curhat.AI</x-responsive-nav-link>
         {{-- Link "Ruang Chat" dihapus dari sini (responsive) --}}
     </div>
-    >>>>>>> c76dc2c05f63794a85b65512f84404c9dbba69a0
     @else
     {{-- Show admin menu for admins --}}
     <div class="pt-2 pb-3 space-y-1">

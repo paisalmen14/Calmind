@@ -38,7 +38,6 @@
 <body class="antialiased">
     <div class="min-h-screen bg-[#FEFBC7]">
         @include('layouts.navigation')
-        >>>>>>> c76dc2c05f63794a85b65512f84404c9dbba69a0
         <main>
             {{ $slot }}
         </main>

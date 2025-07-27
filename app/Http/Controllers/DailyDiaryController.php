@@ -5,31 +5,43 @@ namespace App\Http\Controllers;
 use App\Models\DailyDiary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Carbon\Carbon; // Pastikan Carbon diimport
 
 class DailyDiaryController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $diaries = Auth::user()->dailyDiaries()->latest('entry_date')->paginate(10);
+        $diaries = Auth::user()->dailyDiaries()->latest('entry_date')->paginate(5);
         return view('daily_diary.index', compact('diaries'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
+        // Periksa apakah pengguna sudah membuat entri diary untuk hari ini
         $today = Carbon::today()->toDateString();
         $existingDiary = Auth::user()->dailyDiaries()->whereDate('entry_date', $today)->first();
 
         if ($existingDiary) {
-            return redirect()->route('daily-diary.edit', $existingDiary)->with('info', 'Anda sudah membuat entri diary untuk hari ini. Silakan edit.');
+            // Jika sudah ada, redirect ke halaman edit dengan pesan informasi
+            return redirect()->route('daily-diary.edit', $existingDiary)->with('info', 'Anda sudah membuat entri diary untuk hari ini. Anda dapat mengeditnya di sini.');
         }
 
         return view('daily_diary.create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
+            'title' => 'required|string|max:255', // Tambahkan validasi untuk judul
             'content' => 'required|string|min:10',
         ]);
 
@@ -37,43 +49,22 @@ class DailyDiaryController extends Controller
         $existingDiary = Auth::user()->dailyDiaries()->whereDate('entry_date', $today)->first();
 
         if ($existingDiary) {
-            return back()->with('error', 'Anda sudah membuat entri diary untuk hari ini.')->withInput();
+            return back()->with('error', 'Anda sudah membuat entri diary untuk hari ini. Silakan edit.')->withInput();
         }
 
         DailyDiary::create([
             'user_id' => Auth::id(),
             'entry_date' => $today,
+            'title' => $request->title, // Simpan judul
             'content' => $request->content,
         ]);
 
         return redirect()->route('daily-diary.index')->with('success', 'Diary berhasil disimpan!');
     }
 
-    public function edit(DailyDiary $dailyDiary)
-    {
-        if ($dailyDiary->user_id !== Auth::id()) {
-            abort(403);
-        }
-        return view('daily_diary.edit', compact('dailyDiary'));
-    }
-
-    public function update(Request $request, DailyDiary $dailyDiary)
-    {
-        if ($dailyDiary->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'content' => 'required|string|min:10',
-        ]);
-
-        $dailyDiary->update([
-            'content' => $request->content,
-        ]);
-
-        return redirect()->route('daily-diary.index')->with('success', 'Diary berhasil diperbarui!');
-    }
-
+    /**
+     * Display the specified resource.
+     */
     public function show(DailyDiary $dailyDiary)
     {
         if ($dailyDiary->user_id !== Auth::id()) {
@@ -82,42 +73,75 @@ class DailyDiaryController extends Controller
         return view('daily_diary.show', compact('dailyDiary'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(DailyDiary $dailyDiary)
+    {
+        if ($dailyDiary->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return view('daily_diary.edit', compact('dailyDiary'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, DailyDiary $dailyDiary)
+    {
+        if ($dailyDiary->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255', // Tambahkan validasi untuk judul
+            'content' => 'required|string|min:10',
+        ]);
+
+        $dailyDiary->update([
+            'title' => $request->title, // Update judul
+            'content' => $request->content,
+        ]);
+
+        return redirect()->route('daily-diary.index')->with('success', 'Diary berhasil diperbarui!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(DailyDiary $dailyDiary)
     {
         if ($dailyDiary->user_id !== Auth::id()) {
             abort(403);
         }
+        
         $dailyDiary->delete();
-        return back()->with('success', 'Diary berhasil dihapus!');
+
+        return redirect()->route('daily-diary.index')->with('success', 'Diary berhasil dihapus!');
     }
 
     /**
-     * Menghasilkan rangkuman diary dari minggu sebelumnya.
+     * Display the weekly summary of daily diaries.
      */
-    public function generateWeeklySummary()
+    public function weeklySummary()
     {
-        $startDate = Carbon::now()->subWeek()->startOfWeek();
-        $endDate = Carbon::now()->subWeek()->endOfWeek();
+        $user = Auth::user();
+        $diaries = $user->dailyDiaries()->latest('entry_date')->get();
 
-        $weeklyDiaries = Auth::user()->dailyDiaries()
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->orderBy('entry_date') // Mengurutkan berdasarkan tanggal
-            ->get();
+        $today = Carbon::today();
+        $startOfWeek = $today->startOfWeek(Carbon::MONDAY)->toDateString(); // Mulai dari Senin
+        $endOfWeek = $today->endOfWeek(Carbon::SUNDAY)->toDateString(); // Berakhir di Minggu
 
-        $summaryContent = "";
-        foreach ($weeklyDiaries as $diary) {
-            // Menggunakan format yang lebih deskriptif
-            $summaryContent .= "Pada tanggal " . $diary->entry_date->isoFormat('dddd, D MMMM YYYY') . ", saya merasa:\n";
-            $summaryContent .= $diary->content . "\n\n";
+        $weeklyDiaries = $diaries->filter(function($diary) use ($startOfWeek, $endOfWeek) {
+            return $diary->entry_date->between($startOfWeek, $endOfWeek);
+        });
+
+        // Contoh ringkasan sederhana
+        $summary = "Belum ada rangkuman minggu ini.";
+        if ($weeklyDiaries->count() > 0) {
+            $summary = "Anda telah menulis " . $weeklyDiaries->count() . " entri diary minggu ini. Teruslah menulis!";
         }
 
-        // Menambahkan pesan jika tidak ada diary
-        if (empty(trim($summaryContent))) {
-            $summaryContent = "Anda tidak memiliki catatan diary pada minggu lalu.";
-        }
-
-        // Anda bisa memproses $summaryContent dengan AI (Gemini) untuk ringkasan yang lebih baik
-        // Untuk saat ini, kita hanya akan menampilkannya.
-        return view('daily_diary.weekly_summary', compact('weeklyDiaries', 'summaryContent', 'startDate', 'endDate'));
+        return view('daily_diary.weekly_summary', compact('weeklyDiaries', 'summary', 'startOfWeek', 'endOfWeek'));
     }
 }

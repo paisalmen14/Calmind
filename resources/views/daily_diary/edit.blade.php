@@ -12,6 +12,17 @@
                     @csrf
                     @method('PUT')
                     <div class="p-8">
+                        {{-- Kolom untuk Judul Diary --}}
+                        <div class="mb-6">
+                            <label for="title" class="block font-semibold text-base text-gray-900">Judul Diary Anda</label>
+                            <p class="text-sm text-gray-600 mb-2">Berikan judul singkat untuk entri diary ini.</p>
+                            <x-text-input id="title" name="title" type="text" class="mt-1 block w-full bg-slate-50 border-gray-300 rounded-lg shadow-sm focus:border-brand-pink focus:ring-brand-pink" :value="old('title', $dailyDiary->title)" required autofocus />
+                            @error('title')
+                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Kolom untuk Konten Diary --}}
                         <div>
                             <label for="content" class="block font-semibold text-base text-gray-900">Bagaimana perasaan Anda pada tanggal {{ $dailyDiary->entry_date->isoFormat('dddd, D MMMM YYYY') }}?</label>
                             <p class="text-sm text-gray-600 mb-4">Anda dapat mengubah entri diary ini.</p>

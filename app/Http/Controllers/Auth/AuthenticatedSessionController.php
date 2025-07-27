@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Untuk role 'pengguna' atau role lainnya, gunakan intended redirect
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('articles.index', absolute: false));
     }
 
     /**

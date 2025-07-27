@@ -9,7 +9,8 @@ class DailyDiary extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'entry_date', 'content', 'summary'];
+    // Tambahkan 'title' ke dalam array $fillable
+    protected $fillable = ['user_id', 'entry_date', 'title', 'content', 'summary'];
 
     protected $casts = [
         'entry_date' => 'date',

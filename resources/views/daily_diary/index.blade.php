@@ -32,7 +32,10 @@
                 @forelse ($diaries as $diary)
                     <div class="bg-white p-6 rounded-2xl card-shadow border border-gray-100">
                         <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-lg text-gray-900">{{ $diary->entry_date->isoFormat('dddd, D MMMM YYYY') }}</h3>
+                            <div>
+                                <h3 class="font-bold text-xl text-gray-900">{{ $diary->title }}</h3> {{-- Tampilkan Judul --}}
+                                <p class="text-sm text-gray-500">{{ $diary->entry_date->isoFormat('dddd, D MMMM YYYY') }}</p> {{-- Tanggal di bawah judul --}}
+                            </div>
                             <div class="flex space-x-2">
                                 <a href="{{ route('daily-diary.edit', $diary) }}" class="text-sm font-medium text-brand-pink hover:underline">Edit</a>
                                 <form action="{{ route('daily-diary.destroy', $diary) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus entri diary ini?');">
@@ -55,11 +58,7 @@
                 {{ $diaries->links() }}
             </div>
 
-            <div class="mt-8 text-center">
-                <a href="{{ route('daily-diary.weekly-summary') }}" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-sm hover:opacity-90 transition-all">
-                    Lihat Rangkuman Mingguan
-                </a>
-            </div>
+            {{-- Bagian "Lihat Rangkuman Mingguan" yang telah dihapus --}}
         </div>
     </div>
 </x-app-layout>
