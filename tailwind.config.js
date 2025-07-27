@@ -13,6 +13,9 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                'gabarito': ['Gabarito', ...defaultTheme.fontFamily.sans],
+                'quicksand': ['Quicksand', ...defaultTheme.fontFamily.sans],
+                'londrina': ['Londrina Solid', 'cursive'],
             },
         },
     },
