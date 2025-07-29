@@ -49,17 +49,60 @@ class User extends Authenticatable
     ];
 
     // Definisi Relasi
-    public function stories() { return $this->hasMany(Story::class); } //
-    public function comments() { return $this->hasMany(Comment::class); } //
-    public function psychologistProfile() { return $this->hasOne(PsychologistProfile::class); } //
-    public function availabilities() { return $this->hasMany(Availability::class, 'psychologist_id'); } //
-    public function consultationsAsUser() { return $this->hasMany(Consultation::class, 'user_id'); } //
-    public function consultationsAsPsychologist() { return $this->hasMany(Consultation::class, 'psychologist_id'); } //
-    public function chats() { return $this->hasMany(Chat::class, 'sender_id'); } //
-    public function votes() { return $this->hasMany(Vote::class); } //
-    public function paymentConfirmations() { return $this->hasMany(PaymentConfirmation::class); } //
-    public function chosenPsychologist() { return $this->belongsTo(User::class, 'chosen_psychologist_id'); } //
-    public function dailyDiaries() { return $this->hasMany(DailyDiary::class); } // Relasi baru untuk Daily Diary
+    public function stories()
+    {
+        return $this->hasMany(Story::class);
+    } //
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    } //
+    public function psychologistProfile()
+    {
+        return $this->hasOne(PsychologistProfile::class);
+    } //
+    public function availabilities()
+    {
+        return $this->hasMany(Availability::class, 'psychologist_id');
+    } //
+    public function consultationsAsUser()
+    {
+        return $this->hasMany(Consultation::class, 'user_id');
+    } //
+    public function consultationsAsPsychologist()
+    {
+        return $this->hasMany(Consultation::class, 'psychologist_id');
+    } //
+    public function chats()
+    {
+        return $this->hasMany(Chat::class, 'sender_id');
+    } //
+    public function votes()
+    {
+        return $this->hasMany(Vote::class);
+    } //
+    public function paymentConfirmations()
+    {
+        return $this->hasMany(PaymentConfirmation::class);
+    } //
+    public function chosenPsychologist()
+    {
+        return $this->belongsTo(User::class, 'chosen_psychologist_id');
+    } //
+    public function dailyDiaries()
+    {
+        return $this->hasMany(DailyDiary::class);
+    } // Relasi baru untuk Daily Diary
 
-    public function isMember(): bool { return $this->membership_expires_at && $this->membership_expires_at->isFuture(); } //
+    // --- TAMBAHKAN KODE ANDA DI SINI ---
+    public function moodHistories()
+    {
+        return $this->hasMany(MoodHistory::class);
+    }
+    // ------------------------------------
+
+    public function isMember(): bool
+    {
+        return $this->membership_expires_at && $this->membership_expires_at->isFuture();
+    } //
 }

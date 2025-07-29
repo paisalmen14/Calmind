@@ -43,6 +43,7 @@
                     </x-nav-link>
                     @endif
                 </div>
+                
             </div>
 
             <!-- Settings Dropdown -->

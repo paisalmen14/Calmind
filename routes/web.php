@@ -19,21 +19,58 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PsychologistController as AdminPsychologistController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
-use App\Http\Controllers\Api\MoodController; // <--- TAMBAHKAN USE STATEMENT INI
+use App\Http\Controllers\Api\MoodController;
+use Illuminate\Support\Facades\Auth; // Ditambahkan
+use Carbon\Carbon;                   // Ditambahkan
 
-// Rute ini diubah untuk menampilkan welcome page
+// ==========================================================
+// Rute Beranda (/) Diubah untuk Mengambil Data Statistik Mood
+// ==========================================================
 Route::get('/', function () {
-    return view('welcome');
+    // Inisialisasi variabel dengan nilai default
+    $moodHistories = collect();
+    $moodStats = collect();
+    $averageMood = 'Netral';
+
+    // Hanya ambil data jika pengguna sudah login
+    if (Auth::check()) {
+        $user = Auth::user();
+        $today = Carbon::today();
+        $startOfWeek = $today->copy()->startOfWeek(Carbon::SUNDAY)->toDateString();
+        $endOfWeek = $today->copy()->endOfWeek(Carbon::SATURDAY)->toDateString();
+
+        $moodHistories = $user->moodHistories()
+            ->whereBetween('tracked_at', [$startOfWeek, $endOfWeek])
+            ->get()
+            ->keyBy(function ($item) {
+                return Carbon::parse($item->tracked_at)->format('D');
+            });
+
+        $moodStats = collect(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'])->mapWithKeys(function ($day) use ($moodHistories) {
+            $dayKey = substr($day, 0, 3);
+            $mood = $moodHistories->first(function ($value, $key) use ($dayKey) {
+                return $key === $dayKey;
+            });
+            return [$day => $mood ? $mood->emotion : null];
+        });
+
+        if ($moodHistories->isNotEmpty()) {
+            $averageMood = $moodHistories->groupBy('emotion')->map->count()->sortDesc()->keys()->first();
+        }
+    }
+
+    // Kirim semua data ke view 'welcome'
+    return view('welcome', compact('moodHistories', 'moodStats', 'averageMood'));
 });
 
-// Dashboard akan menampilkan cerita
+
+// Dashboard (Ruang Cerita) akan menampilkan cerita
 Route::get('/dashboard', [StoryController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-// ... rute lainnya
+// Rute Mood Tracker
 Route::get('/mood-tracker', function () {
     return view('mood-tracker');
 })->middleware('auth')->name('mood.tracker');
-// ... rute lainnya
 
 // Pendaftaran Psikolog
 Route::get('register/psychologist', [PsychologistRegisterController::class, 'create'])->middleware('guest')->name('psychologist.register');
@@ -60,9 +97,7 @@ Route::middleware('auth')->group(function () {
 
     // Rute khusus Psikolog
     Route::middleware(['auth', 'role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () {
-        // TAMBAHKAN ROUTE BARU DI SINI
         Route::get('/dashboard', [App\Http\Controllers\Psychologist\DashboardController::class, 'index'])->name('dashboard');
-
         Route::get('/profile', [PsychologistProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [PsychologistProfileController::class, 'update'])->name('profile.update');
         Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
@@ -77,9 +112,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/konsultasi', [ChatbotController::class, 'index'])->name('chatbot.index');
     Route::post('/konsultasi/send', [ChatbotController::class, 'send'])->name('chatbot.send');
 
-    // --- AWAL KODE DETEKSI EMOSI ---
+    // API Deteksi Emosi
     Route::post('/detect-emotion', [MoodController::class, 'detectEmotion'])->name('emotion.detect');
-    // --- AKHIR KODE DETEKSI EMOSI ---
 
     // Chat Konsultasi
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
@@ -98,14 +132,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/weekly-summary', [DailyDiaryController::class, 'generateWeeklySummary'])->name('weekly-summary');
     });
 
-    // Rute khusus Psikolog
-    Route::middleware(['role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () {
-        Route::get('/profile', [PsychologistProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [PsychologistProfileController::class, 'update'])->name('profile.update');
-        Route::get('/availability', [AvailabilityController::class, 'index'])->name('availability.index');
-        Route::post('/availability', [AvailabilityController::class, 'store'])->name('availability.store');
-        Route::delete('/availability/{availability}', [AvailabilityController::class, 'destroy'])->name('availability.destroy');
-    });
+    // Rute khusus Psikolog (Duplikat, bisa dihapus jika tidak ada perbedaan)
+    // Route::middleware(['role:psikolog'])->prefix('psychologist')->name('psychologist.')->group(function () { ... });
 
     // Rute khusus Pengguna (Pasien)
     Route::middleware(['role:pengguna'])->prefix('consultations')->name('consultations.')->group(function () {
@@ -122,21 +150,13 @@ Route::middleware('auth')->group(function () {
 
 // Rute khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Route untuk dashboard admin
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
     Route::resource('articles', AdminArticleController::class);
-
-    // Kelola User
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-
-    // Verifikasi Psikolog
     Route::get('psychologists', [AdminPsychologistController::class, 'index'])->name('psychologists.index');
     Route::patch('psychologists/{psychologist}/approve', [AdminPsychologistController::class, 'approve'])->name('psychologists.approve');
     Route::patch('psychologists/{psychologist}/reject', [AdminPsychologistController::class, 'reject'])->name('psychologists.reject');
-
-    // Verifikasi Pembayaran Konsultasi
     Route::get('/consultation-verifications', [AdminVerificationController::class, 'index'])->name('consultation.verifications.index');
     Route::post('/consultation-verifications/{consultation}/approve', [AdminVerificationController::class, 'approve'])->name('consultation.verifications.approve');
     Route::post('/consultation-verifications/{consultation}/reject', [AdminVerificationController::class, 'reject'])->name('consultation.verifications.reject');
