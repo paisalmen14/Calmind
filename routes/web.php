@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\VerificationController as AdminVerificationContro
 use App\Http\Controllers\Api\MoodController;
 use Illuminate\Support\Facades\Auth; // Ditambahkan
 use Carbon\Carbon;                   // Ditambahkan
+use App\Http\Controllers\EmotionController;
 
 // ==========================================================
 // Rute Beranda (/) Diubah untuk Mengambil Data Statistik Mood
@@ -67,10 +68,6 @@ Route::get('/', function () {
 // Dashboard (Ruang Cerita) akan menampilkan cerita
 Route::get('/dashboard', [StoryController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
-// Rute Mood Tracker
-Route::get('/mood-tracker', function () {
-    return view('mood-tracker');
-})->middleware('auth')->name('mood.tracker');
 
 // Pendaftaran Psikolog
 Route::get('register/psychologist', [PsychologistRegisterController::class, 'create'])->middleware('guest')->name('psychologist.register');
@@ -114,6 +111,9 @@ Route::middleware('auth')->group(function () {
 
     // API Deteksi Emosi
     Route::post('/detect-emotion', [MoodController::class, 'detectEmotion'])->name('emotion.detect');
+    Route::post('/emotion/detect', [EmotionController::class, 'detect'])
+        ->middleware('auth')
+        ->name('emotion.detect');
 
     // Chat Konsultasi
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

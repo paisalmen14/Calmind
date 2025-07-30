@@ -9,20 +9,87 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             {{-- ====================================================== --}}
-            {{-- KODE STATISTIK MOOD DITARUH DI SINI --}}
+            {{-- AWAL DARI KODE FITUR MOOD TRACKER --}}
             {{-- ====================================================== --}}
             @auth
-            {{-- Komponen ini hanya akan tampil jika pengguna sudah login --}}
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-lg mb-8">
+                <div class="p-6 md:p-8 text-gray-900 dark:text-gray-100">
+
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-full max-w-lg bg-gray-900 rounded-lg shadow-md border-2 border-gray-700">
+
+                            {{-- PERUBAHAN ADA DI BARIS INI --}}
+                            <video id="video-preview" width="640" height="480" autoplay muted class="rounded-lg" style="transform: scaleX(-1);"></video>
+
+                            {{-- Placeholder untuk Gambar Hasil Tangkapan --}}
+                            <img id="captured-image" width="640" height="480" class="rounded-lg hidden" alt="Hasil Tangkapan Wajah">
+
+                            {{-- Loading Spinner --}}
+                            <div id="loading-spinner" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg hidden">
+                                <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="ml-4 text-white text-lg">Menganalisis...</span>
+                            </div>
+                        </div>
+
+                        {{-- Tombol-Tombol Aksi --}}
+                        <div class="mt-6 flex space-x-4">
+                            <button id="start-camera-btn" class="flex items-center px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 001.553.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                </svg>
+                                Nyalakan Kamera
+                            </button>
+                            <button id="capture-btn" class="flex items-center px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 1.414 3.498 3.498 0 004.242 0 1 1 0 001.415-1.414 5.498 5.498 0 00-7.072 0z" clip-rule="evenodd" />
+                                </svg>
+                                Cek Mood Saya
+                            </button>
+                            <button id="retake-btn" class="flex items-center px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition-colors hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                </svg>
+                                Ambil Ulang
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Hasil Analisis --}}
+                    <div id="analysis-section" class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 hidden">
+                        <h3 class="text-2xl font-bold text-center mb-4">Hasil Analisis Mood Anda</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                            <p class="text-center text-xl mb-4">Anda terdeteksi sedang merasakan: <span id="result-emotion" class="font-bold text-blue-500 dark:text-blue-400"></span></p>
+                            <div class="prose prose-lg dark:prose-invert max-w-none">
+                                <div id="result-advice"></div>
+                                <h4 class="mt-4 font-semibold">Saran Kegiatan:</h4>
+                                <ul id="result-activities" class="list-disc pl-5"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Canvas untuk memproses gambar, tidak terlihat oleh user --}}
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+            </div>
+            @endauth
+            {{-- ====================================================== --}}
+            {{-- AKHIR DARI KODE FITUR MOOD TRACKER --}}
+            {{-- ====================================================== --}}
+
+
+            {{-- Statistik Mood Mingguan --}}
+            @auth
             <div class="mb-8">
                 <x-mood-stats :moodHistories="$moodHistories" :moodStats="$moodStats" :averageMood="$averageMood" />
             </div>
             @endauth
-            {{-- ====================================================== --}}
 
-
+            {{-- Daftar Artikel --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse ($articles as $article)
-                {{-- Kartu untuk setiap artikel --}}
                 <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col group">
                     <a href="{{ route('articles.show', $article) }}">
                         <img src="{{ asset('storage/' . $article->image_path) }}" alt="{{ $article->title }}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
@@ -30,9 +97,8 @@
                     <div class="p-6 flex flex-col flex-grow">
                         <h3 class="font-bold text-lg text-gray-900 dark:text-gray-100 mb-2 leading-tight">
                             <a href="{{ route('articles.show', $article) }}" class="hover:text-brand-pink transition-colors">
-                                {{-- Batasi judul agar tidak terlalu panjang --}}
                                 {{ Str::limit($article->title, 60) }}
-                                a>
+                            </a>
                         </h3>
                         <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             Diposting {{ $article->created_at->diffForHumans() }}
@@ -57,9 +123,195 @@
                 </div>
                 @endforelse
             </div>
+
+            {{-- Pagination --}}
             <div class="mt-8">
                 {{ $articles->links() }}
             </div>
         </div>
     </div>
+
+    {{--
+    ============================================
+    SCRIPT UNTUK MOOD TRACKER
+    ============================================
+    --}}
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === Data Saran & Aktivitas (Bisa dipindahkan ke database jika perlu) ===
+            const moodAnalysisData = {
+                'Senang': {
+                    advice: 'Anda terlihat bahagia! Pertahankan energi positif ini dan bagikan kebahagiaan Anda kepada orang lain. Senyum Anda menular!',
+                    activities: ['Dengarkan musik yang ceria.', 'Lakukan aktivitas di luar ruangan.', 'Hubungi teman atau keluarga.']
+                },
+                'Sedih': {
+                    advice: 'Tidak apa-apa untuk merasa sedih. Beri diri Anda waktu untuk merasakan emosi ini. Ingat, perasaan ini akan berlalu.',
+                    activities: ['Tulis jurnal tentang perasaan Anda.', 'Tonton film komedi.', 'Bicara dengan seseorang yang Anda percaya.']
+                },
+                'Marah': {
+                    advice: 'Ambil napas dalam-dalam. Cobalah untuk mengidentifikasi apa yang memicu kemarahan Anda dan temukan cara yang sehat untuk menyalurkannya.',
+                    activities: ['Lakukan olahraga ringan seperti berjalan kaki.', 'Dengarkan musik yang menenangkan.', 'Lakukan teknik relaksasi pernapasan.']
+                },
+                'Terkejut': {
+                    advice: 'Sesuatu yang tak terduga terjadi? Luangkan waktu sejenak untuk memprosesnya. Perasaan ini biasanya tidak berlangsung lama.',
+                    activities: ['Ceritakan apa yang terjadi pada teman.', 'Tulis tentang pengalaman itu.', 'Lakukan sesuatu yang rutin untuk merasa lebih stabil.']
+                },
+                'Takut': {
+                    advice: 'Rasa takut adalah respons alami. Kenali apa yang membuat Anda takut dan hadapi dengan perlahan. Anda lebih kuat dari yang Anda kira.',
+                    activities: ['Fokus pada pernapasan Anda.', 'Lakukan meditasi singkat.', 'Bicaralah pada diri sendiri dengan kalimat positif.']
+                },
+                'Jijik': {
+                    advice: 'Perasaan ini menandakan ketidaksukaan yang kuat. Cobalah untuk menjauh dari sumber perasaan ini jika memungkinkan.',
+                    activities: ['Alihkan perhatian Anda ke sesuatu yang netral atau menyenangkan.', 'Bersihkan atau rapikan lingkungan sekitar Anda.', 'Dengarkan podcast atau audiobook.']
+                },
+                'Netral': {
+                    advice: 'Anda berada dalam kondisi yang tenang dan seimbang. Ini adalah waktu yang baik untuk fokus pada tugas atau melakukan refleksi diri.',
+                    activities: ['Buat daftar tugas untuk hari ini.', 'Baca buku atau artikel menarik.', 'Rencanakan sesuatu yang Anda nantikan.']
+                }
+            };
+
+            // === Seleksi Elemen DOM ===
+            const video = document.getElementById('video-preview');
+            const capturedImage = document.getElementById('captured-image');
+            const canvas = document.getElementById('canvas');
+            const startCameraBtn = document.getElementById('start-camera-btn');
+            const captureBtn = document.getElementById('capture-btn');
+            const retakeBtn = document.getElementById('retake-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const analysisSection = document.getElementById('analysis-section');
+            const resultEmotion = document.getElementById('result-emotion');
+            const resultAdvice = document.getElementById('result-advice');
+            const resultActivities = document.getElementById('result-activities');
+
+            let stream = null; // Variabel untuk menyimpan stream video
+
+            // === Event Listeners ===
+            startCameraBtn.addEventListener('click', startCamera);
+            captureBtn.addEventListener('click', captureAndAnalyze);
+            retakeBtn.addEventListener('click', retakePicture);
+
+            // === Fungsi-fungsi ===
+
+            // 1. Fungsi untuk Menyalakan Kamera
+            async function startCamera() {
+                // Sembunyikan hasil analisis sebelumnya jika ada
+                analysisSection.classList.add('hidden');
+
+                try {
+                    // Minta akses kamera
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    });
+                    video.srcObject = stream;
+                    video.classList.remove('hidden');
+                    capturedImage.classList.add('hidden');
+
+                    // Atur visibilitas tombol
+                    startCameraBtn.classList.add('hidden');
+                    captureBtn.classList.remove('hidden');
+                    retakeBtn.classList.add('hidden');
+
+                } catch (err) {
+                    console.error("Error accessing camera: ", err);
+                    alert('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin pada browser.');
+                }
+            }
+
+            // 2. Fungsi untuk Mengambil Gambar dan Menganalisis
+            async function captureAndAnalyze() {
+                // Tampilkan loading spinner
+                loadingSpinner.classList.remove('hidden');
+                captureBtn.disabled = true;
+
+                // Menggambar frame video saat ini ke canvas
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                // Membalik canvas secara horizontal sebelum menggambar video
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Mengembalikan transformasi canvas ke kondisi normal
+                context.setTransform(1, 0, 0, 1, 0, 0);
+
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                capturedImage.src = dataUrl;
+                capturedImage.classList.remove('hidden');
+                stopCamera(); // Hentikan stream kamera
+
+                // Kirim gambar ke server
+                try {
+                    const response = await fetch("{{ route('emotion.detect') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json', // Eksplisit meminta JSON
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            image: dataUrl
+                        })
+                    });
+
+                    const result = await response.json(); // Coba parsing JSON
+
+                    if (!response.ok) {
+                        // Jika respons tidak OK (status bukan 2xx), lempar error dengan pesan dari JSON
+                        throw new Error(result.error || 'Terjadi kesalahan yang tidak diketahui.');
+                    }
+
+                    // Tampilkan hasil jika berhasil
+                    displayAnalysis(result.emotion);
+
+                } catch (error) {
+                    console.error('Error during analysis:', error);
+                    alert(error.message || 'Terjadi kesalahan saat menganalisis mood. Silakan coba lagi.');
+                    retakePicture(); // Reset jika error
+                } finally {
+                    // Sembunyikan loading spinner dan atur tombol
+                    loadingSpinner.classList.add('hidden');
+                    captureBtn.classList.add('hidden');
+                    retakeBtn.classList.remove('hidden');
+                    captureBtn.disabled = false;
+                }
+            }
+            // 3. Fungsi untuk Menghentikan Kamera
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                video.classList.add('hidden');
+            }
+
+            // 4. Fungsi untuk Mengambil Ulang Gambar
+            function retakePicture() {
+                analysisSection.classList.add('hidden');
+                capturedImage.classList.add('hidden');
+                startCamera(); // Langsung nyalakan lagi kameranya
+            }
+
+            // 5. Fungsi untuk Menampilkan Hasil Analisis
+            function displayAnalysis(emotion) {
+                const data = moodAnalysisData[emotion] || moodAnalysisData['Netral'];
+
+                resultEmotion.textContent = emotion;
+                resultAdvice.innerHTML = `<p>${data.advice}</p>`;
+                resultActivities.innerHTML = data.activities.map(act => `<li>${act}</li>`).join('');
+
+                analysisSection.classList.remove('hidden');
+
+                // Refresh halaman untuk update statistik mingguan
+                setTimeout(() => {
+                    window.location.reload();
+                }, 15000); // Refresh setelah 15 detik agar user sempat membaca
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>

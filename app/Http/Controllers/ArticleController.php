@@ -10,16 +10,12 @@ use Carbon\Carbon;
 
 class ArticleController extends Controller
 {
-    /**
-     * Menampilkan daftar artikel (Halaman Beranda Anda).
-     */
     public function index()
     {
         $articles = Article::latest()->paginate(10);
 
-        // --- AWAL LOGIKA STATISTIK MOOD YANG DIPERBAIKI ---
-        $moodHistories = collect(); // Diperlukan untuk Rata-rata Mood
-        $moodStats = collect();     // Diperlukan untuk Riwayat dan Chart
+        $moodHistories = collect();
+        $moodStats = collect();
         $averageMood = 'Netral';
 
         if (Auth::check()) {
@@ -28,49 +24,48 @@ class ArticleController extends Controller
             $startOfWeek = $today->copy()->startOfWeek(Carbon::SUNDAY);
             $endOfWeek = $today->copy()->endOfWeek(Carbon::SATURDAY);
 
-            // 1. Ambil data mood minggu ini dari database
             $moodHistories = $user->moodHistories()
                 ->whereBetween('tracked_at', [$startOfWeek->toDateString(), $endOfWeek->toDateString()])
                 ->get();
 
-            // 2. Indeks data berdasarkan nama hari B.Inggris (Sun, Mon, etc.) agar mudah dicari
             $moodsByKey = $moodHistories->keyBy(function ($item) {
                 return Carbon::parse($item->tracked_at)->format('D');
             });
 
-            // 3. Siapkan array untuk memetakan nama hari dari B.Inggris ke B.Indonesia
-            $dayMap = [
-                'Sun' => 'Min',
-                'Mon' => 'Sen',
-                'Tue' => 'Sel',
-                'Wed' => 'Rab',
-                'Thu' => 'Kam',
-                'Fri' => 'Jum',
-                'Sat' => 'Sab'
-            ];
+            // ======================================================
+            // AWAL DARI BLOK LOGIKA YANG DIPERBAIKI
+            // ======================================================
 
-            // 4. Buat koleksi statistik yang *pasti* berurutan
-            $moodStats = collect($dayMap)->map(function ($indonesianDay, $englishDay) use ($moodsByKey) {
-                // Cari mood berdasarkan key hari B.Inggris
+            // Definisikan level untuk setiap emosi (1=rendah, 4=tinggi)
+            $moodLevels = ['Marah' => 1, 'Jijik' => 2, 'Takut' => 2, 'Sedih' => 2, 'Terkejut' => 3, 'Netral' => 3, 'Senang' => 4];
+
+            // Peta nama hari dari Inggris ke Indonesia
+            $dayMap = ['Sun' => 'Min', 'Mon' => 'Sen', 'Tue' => 'Sel', 'Wed' => 'Rab', 'Thu' => 'Kam', 'Fri' => 'Jum', 'Sat' => 'Sab'];
+
+            // Buat koleksi statistik yang lebih terstruktur
+            $moodStats = collect($dayMap)->map(function ($indonesianDay, $englishDay) use ($moodsByKey, $moodLevels) {
                 $mood = $moodsByKey->get($englishDay);
-                // Kembalikan emosi jika ada, atau null jika tidak ada
-                return $mood ? $mood->emotion : null;
+                $emotion = $mood ? $mood->emotion : null;
+
+                return [
+                    'day' => $indonesianDay, // Nama hari dalam B. Indonesia
+                    'emotion' => $emotion,   // Nama emosi (string) atau null
+                    'level' => $moodLevels[$emotion] ?? 0.2, // Level numerik untuk diagram (0.2 untuk hari kosong)
+                ];
             });
 
-            // 5. Hitung rata-rata mood
+            // Hitung rata-rata mood (logika ini tetap sama)
             if ($moodHistories->isNotEmpty()) {
                 $averageMood = $moodHistories->groupBy('emotion')->map->count()->sortDesc()->keys()->first();
             }
+            // ======================================================
+            // AKHIR DARI BLOK LOGIKA YANG DIPERBAIKI
+            // ======================================================
         }
-        // --- AKHIR LOGIKA STATISTIK MOOD ---
 
-        // Kirim semua data yang diperlukan ke view
         return view('articles.index', compact('articles', 'moodHistories', 'moodStats', 'averageMood'));
     }
 
-    /**
-     * Menampilkan detail satu artikel.
-     */
     public function show(Article $article)
     {
         return view('articles.show', compact('article'));

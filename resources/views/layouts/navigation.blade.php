@@ -31,9 +31,7 @@
                     <x-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">
                         Curhat.AI
                     </x-nav-link>
-                    <x-nav-link :href="route('mood.tracker')" :active="request()->routeIs('mood.tracker')">
-                        Mood Tracker
-                    </x-nav-link>
+
 
                     {{-- Link "Ruang Chat" dihapus dari sini --}}
                     @else
@@ -43,7 +41,7 @@
                     </x-nav-link>
                     @endif
                 </div>
-                
+
             </div>
 
             <!-- Settings Dropdown -->
