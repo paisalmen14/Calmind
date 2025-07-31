@@ -31,10 +31,6 @@
                     <x-nav-link :href="route('chatbot.index')" :active="request()->routeIs('chatbot.*')">
                         Curhat.AI
                     </x-nav-link>
-                    <x-nav-link :href="route('mood-analysis.index')" :active="request()->routeIs('mood-analysis.*')">
-                        {{ __('Mood Analysis') }}
-                    </x-nav-link>
-
 
                     {{-- Link "Ruang Chat" dihapus dari sini --}}
                     @else
@@ -65,6 +61,7 @@
                     </x-slot>
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">Profil Saya</x-dropdown-link>
+                        {{-- Mood Tracker --}}
                         {{-- Menambahkan link "Riwayat Konsultasi" di bawah "Profil Saya" --}}
                         <x-dropdown-link :href="route('consultations.history')">Riwayat Konsultasi</x-dropdown-link>
                         <!-- Authentication -->
@@ -94,7 +91,6 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         {{-- Show user menu for non-admins --}}
         @if(Auth::user()->role !== 'admin')
-        <<<<<<< HEAD
             <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Ruang Cerita</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">Artikel</x-responsive-nav-link>
@@ -103,7 +99,7 @@
             <x-responsive-nav-link :href="route('daily-diary.index')" :active="request()->routeIs('daily-diary.*')">Diary Harian</x-responsive-nav-link>
             {{-- Link "Ruang Chat" dihapus dari sini (responsive) --}}
     </div>
-    =======
+    
     <div class="pt-2 pb-3 space-y-1">
         <x-responsive-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">Artikel</x-responsive-nav-link>
         <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Ruang Cerita</x-responsive-nav-link>
