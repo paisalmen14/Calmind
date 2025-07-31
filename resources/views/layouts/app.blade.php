@@ -35,8 +35,8 @@
     </style>
 </head>
 
-<body class="antialiased">
-    <div class="min-h-screen bg-[#FEFBC7]">
+<body class="antialiased bg-[#FEFBC7]">
+    <div>
         @include('layouts.navigation')
 
         <main>

@@ -18,7 +18,7 @@
                             <p class="text-sm text-black mb-4">Ceritakan semua hal yang dapat diceritakan.</p>
                             
                             <textarea name="content" id="content" rows="12" 
-                                      class="mt-1 block w-full bg-slate-50 border-gray-300 rounded-lg shadow-sm focus:border-brand-purple focus:ring-brand-purple" 
+                                      class="mt-1 block w-full bg-slate-50 border-gray-300 rounded-lg shadow-sm focus:border-black focus:ring-black" 
                                       placeholder="Tulis ceritamu di sini...">{{ old('content') }}</textarea>
                             @error('content')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>

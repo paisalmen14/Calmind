@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @extends('master')
     {{-- @extends('master') --}} {{-- Catatan: @extends biasanya tidak ditaruh di <head> --}}
 
     <style>
@@ -51,7 +52,7 @@
                     @auth
                     <a href="{{ url('/dashboard') }}" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-brand-purple transition-colors">Ruang Cerita</a>
                     @else
-                    <a href="{{ route('login') }}" class="font-gabarito px-3 py-2 text-sm font-medium text-black hover:text-brand-purple transition-colors">Log in</a>
+                    <a href="{{ route('login') }}" class="font-gabarito px-3 py-2 text-sm font-medium text-black hover:text-[#E14434] transition-colors">Log in</a>
                     <a href="{{ route('register') }}" class="font-gabarito px-6 py-2 text-sm font-medium text-black bg-[#FFB4B4] rounded-full hover:opacity-70 transition-colors">Register</a>
                     @endauth
                     @endif
@@ -76,7 +77,7 @@
                             <a href="{{ route('login') }}" class="px-6 py-2 bg-[#FFB4B4] text-black rounded-full hover:opacity-70 transition-opacity whitespace-nowrap">
                                 Mulai Sekarang
                             </a>
-                            <a href="#fitur" class="font-gabarito px-4 py-2 font-semibold text-white bg-black rounded-full border border-slate-200 hover:opacity-70 transition-colors whitespace-nowrap">
+                            <a href="#fitur" class="px-4 py-2 text-white bg-black rounded-full border border-slate-200 hover:opacity-70 transition-colors whitespace-nowrap">
                                 Lihat Fitur
                             </a>
                         </div>

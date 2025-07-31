@@ -21,3 +21,30 @@ body {
 .font-quicksand {
     font-family: 'Quicksand', sans-serif;
 }
+
+/* Kustomisasi untuk efek outline/stroke pada teks (untuk heading) */
+.text-outline-effect {
+    text-shadow:
+        1px 1px 0px black,
+        -1px -1px 0px black,
+        1px -1px 0px black,
+        -1px 1px 0px black;
+}
+
+/* Kustomisasi untuk efek outline/stroke pada teks (untuk paragraf - ukuran lebih tipis) */
+.text-outline-effect-sm {
+    text-shadow:
+        0.5px 0.5px 0px black,
+        -0.5px -0.5px 0px black,
+        0.5px -0.5px 0px black,
+        -0.5px 0.5px 0px black;
+}
+
+/* Opsi lain jika ingin stroke lebih tebal (bisa gunakan kelas terpisah) */
+.text-outline-effect-md {
+    text-shadow:
+        1.5px 1.5px 0px black,
+        -1.5px -1.5px 0px black,
+        1.5px -1.5px 0px black,
+        -1.5px 1.5px 0px black;
+}
