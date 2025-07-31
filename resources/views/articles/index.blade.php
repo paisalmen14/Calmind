@@ -1,93 +1,22 @@
 <x-app-layout>
-    <div class="py-12">
+    {{--
+    =====================================================================
+    LANGKAH 1: Tambahkan Alpine.js untuk mengontrol modal 
+    =====================================================================
+    x-data="{ dailyMoodModalOpen: false }" akan membuat state untuk modal.
+    @keydown.escape.window="dailyMoodModalOpen = false" agar modal bisa ditutup dengan tombol Escape.
+    --}}
+    <div class.py-12" x-data="{ dailyMoodModalOpen: false }" @keydown.escape.window="dailyMoodModalOpen = false">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @auth
-            {{-- ====================================================== --}}
-            {{-- AWAL DARI KODE FITUR MOOD TRACKER --}}
-            {{-- ====================================================== --}}
-            @auth
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-lg mb-8">
-                <div class="p-6 md:p-8 text-gray-900 dark:text-gray-100">
-
-                    <div class="flex flex-col items-center">
-                        <div class="relative w-full max-w-lg bg-gray-900 rounded-lg shadow-md border-2 border-gray-700">
-
-                            {{-- PERUBAHAN ADA DI BARIS INI --}}
-                            <video id="video-preview" width="640" height="480" autoplay muted class="rounded-lg" style="transform: scaleX(-1);"></video>
-
-                            {{-- Placeholder untuk Gambar Hasil Tangkapan --}}
-                            <img id="captured-image" width="640" height="480" class="rounded-lg hidden" alt="Hasil Tangkapan Wajah">
-
-                            {{-- Loading Spinner --}}
-                            <div id="loading-spinner" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg hidden">
-                                <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span class="ml-4 text-white text-lg">Menganalisis...</span>
-                            </div>
-                        </div>
-
-                        {{-- Tombol-Tombol Aksi --}}
-                        <div class="mt-6 flex space-x-4">
-                            <button id="start-camera-btn" class="flex items-center px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 001.553.832l3-2a1 1 0 000-1.664l-3-2z" />
-                                </svg>
-                                Nyalakan Kamera
-                            </button>
-                            <button id="capture-btn" class="flex items-center px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors hidden">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 1.414 3.498 3.498 0 004.242 0 1 1 0 001.415-1.414 5.498 5.498 0 00-7.072 0z" clip-rule="evenodd" />
-                                </svg>
-                                Cek Mood Saya
-                            </button>
-                            <button id="retake-btn" class="flex items-center px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition-colors hidden">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                                </svg>
-                                Ambil Ulang
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Hasil Analisis --}}
-                    <div id="analysis-section" class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 hidden">
-                        <h3 class="text-2xl font-bold text-center mb-4">Hasil Analisis Mood Anda</h3>
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-                            <p class="text-center text-xl mb-4">Anda terdeteksi sedang merasakan: <span id="result-emotion" class="font-bold text-blue-500 dark:text-blue-400"></span></p>
-                            <div class="prose prose-lg dark:prose-invert max-w-none">
-                                <div id="result-advice"></div>
-                                <h4 class="mt-4 font-semibold">Saran Kegiatan:</h4>
-                                <ul id="result-activities" class="list-disc pl-5"></ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Canvas untuk memproses gambar, tidak terlihat oleh user --}}
-                    <canvas id="canvas" style="display: none;"></canvas>
-                </div>
-            </div>
-            @endauth
-            {{-- ====================================================== --}}
-            {{-- AKHIR DARI KODE FITUR MOOD TRACKER --}}
-            {{-- ====================================================== --}}
-
-
-            {{-- Statistik Mood Mingguan --}}
-            @auth
-            <div class="mb-8">
-                <x-mood-stats :moodHistories="$moodHistories" :moodStats="$moodStats" :averageMood="$averageMood" />
-            </div>
-            @endauth
+            {{-- Bagian Mood Tracker dan Statistik sekarang dipindahkan ke dalam modal di bawah --}}
         </div>
 
         <section class="py-12 md:py-16 lg:py-20 px-4 md:px-8 lg:px-12">
             <div class="max-w-full mx-auto">
                 <div class="min-h-[400px] flex items-end relative overflow-hidden bg-no-repeat 
                             p-10 md:p-16 lg:p-20 rounded-2xl card-shadow"
-                     style="background-image: url('/images/beranda1.jpg'); background-size: 120%; background-position: 50% 87%; background-color: #5EABD6;">
-                    
+                    style="background-image: url('/images/beranda1.jpg'); background-size: 120%; background-position: 50% 87%; background-color: #5EABD6;">
+
                     <div class="max-w-6xl text-left text-white">
                         <h2 class="font-londrina text-6xl lg:text-7xl leading-tight mb-4 text-outline-effect-md">
                             Pahami Dirimu, <br> Jaga Kesehatan Mentalmu
@@ -95,9 +24,17 @@
                         <p class="font-quicksand text-lg mb-8 font-bold text-outline-effect-sm">
                             Dapatkan kekuatan dan perspektif baru dari setiap bacaan. Temukan inspirasi, strategi, dan panduan yang Anda butuhkan untuk memahami diri dan tumbuh menjadi pribadi yang lebih baik.
                         </p>
-                        <a href="#" class="font-gabarito px-5 py-2.5 bg-[#FFB4B4] text-black rounded-full hover:bg-[#E14434] transition-opacity whitespace-nowrap">
+
+                        {{--
+                        =====================================================================
+                        LANGKAH 2: Ubah tombol "Daily Mood" menjadi pemicu modal
+                        =====================================================================
+                        href="#" dihapus dan diganti dengan @click.prevent="dailyMoodModalOpen = true"
+                        untuk membuka modal tanpa me-refresh halaman.
+                        --}}
+                        <button @click.prevent="dailyMoodModalOpen = true" class="font-gabarito px-5 py-2.5 bg-[#FFB4B4] text-black rounded-full hover:bg-[#E14434] transition-opacity whitespace-nowrap">
                             Daily Mood
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -145,13 +82,98 @@
                 {{ $articles->links() }}
             </div>
         </div>
+
+        {{--
+        =====================================================================
+        LANGKAH 3: Pindahkan Mood Tracker & Statistik ke dalam Modal
+        =====================================================================
+        Kode Mood Tracker dan Statistik kini berada di dalam struktur modal.
+        - x-show="dailyMoodModalOpen" akan menampilkan modal jika nilainya true.
+        - @click.away="dailyMoodModalOpen = false" akan menutup modal jika mengklik di luar area modal.
+        - Ada tombol close (X) yang juga berfungsi untuk menutup modal.
+        --}}
+        @auth
+        <div
+            x-show="dailyMoodModalOpen"
+            style="display: none;"
+            x-transition:enter="ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+
+            <div @click.away="dailyMoodModalOpen = false" class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+                {{-- Tombol Close Modal --}}
+                <button @click="dailyMoodModalOpen = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                {{-- KONTEN MOOD TRACKER & STATISTIK YANG DIPINDAHKAN --}}
+                <div class="bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg mb-8">
+                    <div class="p-6 md:p-8 text-gray-900 dark:text-gray-100">
+
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-full max-w-lg bg-gray-900 rounded-lg shadow-md border-2 border-gray-700">
+                                <video id="video-preview" width="640" height="480" autoplay muted class="rounded-lg" style="transform: scaleX(-1);"></video>
+                                <img id="captured-image" width="640" height="480" class="rounded-lg hidden" alt="Hasil Tangkapan Wajah">
+                                <div id="loading-spinner" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg hidden">
+                                    <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="ml-4 text-white text-lg">Menganalisis...</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex space-x-4">
+                                <button id="start-camera-btn" class="flex items-center px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 001.553.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                    </svg>
+                                    Nyalakan Kamera
+                                </button>
+                                <button id="capture-btn" class="flex items-center px-6 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 disabled:opacity-50 transition-colors hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 1.414 3.498 3.498 0 004.242 0 1 1 0 001.415-1.414 5.498 5.498 0 00-7.072 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    Cek Mood Saya
+                                </button>
+                                <button id="retake-btn" class="flex items-center px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition-colors hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                    </svg>
+                                    Ambil Ulang
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="analysis-section" class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 hidden">
+                            <h3 class="text-2xl font-bold text-center mb-4">Hasil Analisis Mood Anda</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                                <p class="text-center text-xl mb-4">Anda terdeteksi sedang merasakan: <span id="result-emotion" class="font-bold text-blue-500 dark:text-blue-400"></span></p>
+                                <div class="prose prose-lg dark:prose-invert max-w-none">
+                                    <div id="result-advice"></div>
+                                    <h4 class="mt-4 font-semibold">Saran Kegiatan:</h4>
+                                    <ul id="result-activities" class="list-disc pl-5"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <x-mood-stats :moodHistories="$moodHistories" :moodStats="$moodStats" :averageMood="$averageMood" />
+                </div>
+            </div>
+        </div>
+        @endauth
     </div>
 
-    {{--
-    ============================================
-    SCRIPT UNTUK MOOD TRACKER
-    ============================================
-    --}}
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -212,11 +234,9 @@
 
             // 1. Fungsi untuk Menyalakan Kamera
             async function startCamera() {
-                // Sembunyikan hasil analisis sebelumnya jika ada
                 analysisSection.classList.add('hidden');
 
                 try {
-                    // Minta akses kamera
                     stream = await navigator.mediaDevices.getUserMedia({
                         video: true,
                         audio: false
@@ -225,7 +245,6 @@
                     video.classList.remove('hidden');
                     capturedImage.classList.add('hidden');
 
-                    // Atur visibilitas tombol
                     startCameraBtn.classList.add('hidden');
                     captureBtn.classList.remove('hidden');
                     retakeBtn.classList.add('hidden');
@@ -238,36 +257,29 @@
 
             // 2. Fungsi untuk Mengambil Gambar dan Menganalisis
             async function captureAndAnalyze() {
-                // Tampilkan loading spinner
                 loadingSpinner.classList.remove('hidden');
                 captureBtn.disabled = true;
 
-                // Menggambar frame video saat ini ke canvas
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
 
-                // Membalik canvas secara horizontal sebelum menggambar video
                 context.translate(canvas.width, 0);
                 context.scale(-1, 1);
-
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                // Mengembalikan transformasi canvas ke kondisi normal
                 context.setTransform(1, 0, 0, 1, 0, 0);
 
                 const dataUrl = canvas.toDataURL('image/jpeg');
                 capturedImage.src = dataUrl;
                 capturedImage.classList.remove('hidden');
-                stopCamera(); // Hentikan stream kamera
+                stopCamera();
 
-                // Kirim gambar ke server
                 try {
                     const response = await fetch("{{ route('emotion.detect') }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json', // Eksplisit meminta JSON
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
@@ -275,28 +287,26 @@
                         })
                     });
 
-                    const result = await response.json(); // Coba parsing JSON
+                    const result = await response.json();
 
                     if (!response.ok) {
-                        // Jika respons tidak OK (status bukan 2xx), lempar error dengan pesan dari JSON
                         throw new Error(result.error || 'Terjadi kesalahan yang tidak diketahui.');
                     }
 
-                    // Tampilkan hasil jika berhasil
                     displayAnalysis(result.emotion);
 
                 } catch (error) {
                     console.error('Error during analysis:', error);
                     alert(error.message || 'Terjadi kesalahan saat menganalisis mood. Silakan coba lagi.');
-                    retakePicture(); // Reset jika error
+                    retakePicture();
                 } finally {
-                    // Sembunyikan loading spinner dan atur tombol
                     loadingSpinner.classList.add('hidden');
                     captureBtn.classList.add('hidden');
                     retakeBtn.classList.remove('hidden');
                     captureBtn.disabled = false;
                 }
             }
+
             // 3. Fungsi untuk Menghentikan Kamera
             function stopCamera() {
                 if (stream) {
@@ -309,7 +319,7 @@
             function retakePicture() {
                 analysisSection.classList.add('hidden');
                 capturedImage.classList.add('hidden');
-                startCamera(); // Langsung nyalakan lagi kameranya
+                startCamera();
             }
 
             // 5. Fungsi untuk Menampilkan Hasil Analisis
@@ -322,10 +332,9 @@
 
                 analysisSection.classList.remove('hidden');
 
-                // Refresh halaman untuk update statistik mingguan
                 setTimeout(() => {
                     window.location.reload();
-                }, 15000); // Refresh setelah 15 detik agar user sempat membaca
+                }, 15000);
             }
         });
     </script>
