@@ -42,7 +42,7 @@
                 <div class="mt-auto pt-8">
                     <a href="/" class="flex items-center gap-3" aria-label="Calmind Homepage">
                         <x-application-logo class="w-8 h-8 text-brand-purple" />
-                        <span class="font-serif text-2xl font-bold text-gray-900">Calmind</span>
+                        <span class="font-gabarito text-2xl text-gray-900">Calmind</span>
                     </a>
                 </div>
             </div>
