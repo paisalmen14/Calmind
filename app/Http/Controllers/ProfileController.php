@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\User; // <-- Tambahkan ini
+use App\Models\User;
+use App\Models\Consultation; // 1. Tambahkan ini
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class ProfileController extends Controller
     /**
      * Menampilkan profil publik pengguna lain.
      */
-    public function show(User $user): View // <-- Tambahkan method ini
+    public function show(User $user): View
     {
         // Ambil cerita dari user yang tidak anonim
         $stories = $user->stories()
@@ -27,15 +28,13 @@ class ProfileController extends Controller
         return view('consultations.profile.show', compact('user', 'stories'));
     }
 
-    /**
-     * Menampilkan form profil pengguna.
-     */
-    public function edit(Request $request): View
-    {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
+    
+public function edit(Request $request): View
+{
+    return view('profile.edit', [
+        'user' => $request->user(),
+    ]);
+}
 
     /**
      * Memperbarui informasi profil pengguna.
