@@ -49,14 +49,21 @@ Route::get('/', function () {
                 return Carbon::parse($item->tracked_at)->format('D');
             });
 
-        $moodStats = collect(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'])->mapWithKeys(function ($day) use ($moodHistories) {
-            $dayKey = substr($day, 0, 3);
-            $mood = $moodHistories->first(function ($value, $key) use ($dayKey) {
-                return $key === $dayKey;
-            });
-            return [$day => $mood ? $mood->emotion : null];
-        });
+        // routes/web.php - KODE PERBAIKAN
+        $dayMap = ['Sun' => 'Min', 'Mon' => 'Sen', 'Tue' => 'Sel', 'Wed' => 'Rab', 'Thu' => 'Kam', 'Fri' => 'Jum', 'Sat' => 'Sab'];
 
+        $moodStats = collect($dayMap)->map(function ($indonesianDay, $englishDay) use ($moodHistories) {
+            $mood = $moodHistories->get($englishDay);
+            $emotion = $mood ? $mood->emotion : null;
+            $level = $mood ? $mood->level : 0; // Tambahkan baris ini
+
+            return [
+                'day' => $indonesianDay,
+                'emotion' => $emotion,
+                'level' => $level, // Dan tambahkan key 'level' di sini
+            ];
+        })->values();
+        
         if ($moodHistories->isNotEmpty()) {
             $averageMood = $moodHistories->groupBy('emotion')->map->count()->sortDesc()->keys()->first();
         }
